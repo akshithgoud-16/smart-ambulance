@@ -12,7 +12,7 @@
   overflow-x: hidden;
 }
 
-/* Hero Section */
+/* Hero Section (No changes needed here) */
 .hero {
   min-height: 100vh;
   display: flex;
@@ -101,7 +101,7 @@
   max-width: 500px;
 }
 
-/* MODIFICATION START: Remove underline from the Link */
+/* CTA Buttons */
 .cta-button {
   background: white;
   color: #e74c3c;
@@ -113,12 +113,9 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  /* New Rule */
   text-decoration: none; 
-  /* Treat as inline block for proper padding when used as a Link */
   display: inline-block;
 }
-/* MODIFICATION END */
 
 .cta-button:hover {
   transform: translateY(-3px);
@@ -153,6 +150,7 @@
   font-size: 120px;
   animation: bounce 2s infinite;
   filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.3));
+  color: white;
 }
 
 @keyframes bounce {
@@ -216,12 +214,29 @@
   box-shadow: 0 20px 50px #33415c;
 }
 
+/* 🌟 UNIQUE ICON STYLING 1: Circular Backgrounds & Glow */
 .feature-icon {
   font-size: 3.5rem;
   margin-bottom: 20px;
   position: relative;
   z-index: 1;
+  /* New Styles */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: white; /* Vibrant background */
+  transition: all 0.4s ease;
 }
+
+.feature-card:hover .feature-icon {
+  transform: rotate(10deg) scale(1.1);
+  box-shadow: 0 0 30px rgba(26, 188, 156, 0.8);
+}
+/* END UNIQUE ICON STYLING 1 */
+
 
 .feature-card h3 {
   font-size: 1.5rem;
@@ -255,24 +270,25 @@
 
 .steps-container {
   display: flex;
-  align-items: center;
+  align-items: stretch; /* FIX: Makes all steps stretch to the max height */
   justify-content: space-between;
   max-width: 1200px;
   margin: 0 auto;
   flex-wrap: wrap;
 }
 
+/* FIX: Ensure equal height and align content to the top */
 .step {
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Aligns content to the top within the stretched box */
   gap: 20px;
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(10px);
   padding: 30px;
   border-radius: 20px;
   border: 2px solid rgba(255, 255, 255, 0.3);
-  flex: 1;
-  min-width: 250px;
+  flex: 1 1 200px; /* Equal width distribution */
+  min-width: 250px; 
   transition: all 0.3s ease;
 }
 
@@ -309,20 +325,22 @@
 
 .step-connector {
   width: 40px;
-  height: 3px;
-  background: rgba(255, 255, 255, 0.4);
-  position: relative;
+  display: flex;
+  align-items: center;   /* vertically center content */
+  justify-content: center; /* horizontally center content */
   flex-shrink: 0;
+  height: auto; /* let it match step height */
 }
 
 .step-connector::after {
   content: '→';
-  position: absolute;
-  right: -10px;
-  top: -12px;
-  color: white;
   font-size: 1.5rem;
+  color: white;
+  line-height: 1;
 }
+
+
+/* ------------------------ */
 
 /* Our Team Section */
 .our-team {
@@ -363,10 +381,44 @@
   box-shadow: 0 20px 40px rgba(52, 152, 219, 0.3);
 }
 
+/* 🌟 UNIQUE ICON STYLING 2: Animated Ring with Color Change */
 .team-icon {
   font-size: 4rem;
   margin-bottom: 20px;
+  position: relative;
+  /* New Styles */
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 4px solid #3498db;
+  transition: all 0.3s ease;
+  overflow: hidden;
 }
+
+.team-card:hover .team-icon {
+  border-color: #2ecc71; /* Green color on hover */
+  transform: scale(1.05);
+}
+
+/* Adding a subtle rotation animation */
+.team-icon::after {
+  content: '';
+  position: absolute;
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+  animation: rotate 10s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+/* END UNIQUE ICON STYLING 2 */
 
 .team-card h3 {
   font-size: 1.5rem;
@@ -436,12 +488,39 @@
   box-shadow: 0 20px 40px rgba(243, 156, 18, 0.4);
 }
 
+/* 🌟 UNIQUE ICON STYLING 3: Modern Box Effect with Pseudo-element */
 .police-icon {
   font-size: 4rem;
   margin-bottom: 20px;
   position: relative;
   z-index: 1;
+  /* New Styles */
+  display: inline-block;
+  padding: 15px;
+  background: #f39c12; /* Icon primary color */
+  border-radius: 10px;
+  filter: drop-shadow(0 5px 15px rgba(243, 156, 18, 0.4));
+  transition: transform 0.3s ease;
 }
+
+.police-icon::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border: 3px solid #f39c12;
+    border-radius: 15px;
+    z-index: -1;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+}
+
+.police-card:hover .police-icon {
+    transform: scale(0.95);
+}
+/* END UNIQUE ICON STYLING 3 */
 
 .police-card h3 {
   font-size: 1.5rem;
@@ -478,7 +557,6 @@
   opacity: 0.95;
 }
 
-/* MODIFICATION START: Remove underline from the Link */
 .cta-button-large {
   background: white;
   color: #e74c3c;
@@ -490,12 +568,9 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-  /* New Rule */
   text-decoration: none;
-  /* Ensure it behaves like a button with Link usage */
   display: inline-block;
 }
-/* MODIFICATION END */
 
 .cta-button-large:hover {
   transform: translateY(-5px);
