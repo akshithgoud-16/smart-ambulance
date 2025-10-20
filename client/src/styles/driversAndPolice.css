@@ -1,0 +1,212 @@
+.driver-dashboard {
+  padding: 20px;
+}
+
+.driver-title-top {
+  margin-bottom: 16px;
+}
+
+.driver-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.driver-tab {
+  padding: 10px 20px;
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.driver-tab.active {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.driver-section-title {
+  margin-bottom: 10px;
+}
+
+.muted {
+  color: #666666;
+}
+
+.driver-card {
+  border: 1px solid #e2e6ea;
+  padding: 15px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.driver-card.accepted {
+  background: #fff3cd;
+}
+
+.driver-card.completed {
+  background: #d4edda;
+}
+
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  margin-right: 8px;
+}
+
+.btn.accept {
+  background: #28a745;
+  color: #ffffff;
+}
+
+.btn.complete {
+  background: #17a2b8;
+  color: #ffffff;
+}
+
+.btn.share {
+  background: #6f42c1;
+  color: #ffffff;
+}
+
+.status-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status {
+  font-weight: bold;
+}
+
+.status.completed {
+  color: green;
+}
+
+.status.accepted {
+  color: orange;
+}
+
+/* === Drivers & Police Page CSS === */
+
+.drivers-police-container {
+  padding: 50px 80px;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background-color: #fefae0; /* theme background */
+  min-height: 100vh;
+}
+
+/* --- Top Section Buttons --- */
+.login-section {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  margin-bottom: 100px;
+  flex-wrap: wrap;
+}
+
+.login-card {
+  flex: 1;
+  min-width: 280px;
+  max-width: 400px;
+  background: #fff;
+  padding: 40px;
+  border-radius: 18px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.login-card:hover {
+  transform: translateY(-8px);
+}
+
+.login-card h2 {
+  margin-bottom: 25px;
+  font-size: 26px;
+  color: #333;
+}
+
+.login-card button {
+  padding: 15px 30px;
+  background: #d4a373;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.login-card button:hover {
+  background: #b07d4f;
+  transform: scale(1.08);
+}
+
+/* --- Info Sections --- */
+.info-section {
+  margin: 100px 0;
+  text-align: center;
+}
+
+.info-section h2 {
+  font-size: 36px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 60px;
+  display: inline-block;
+  position: relative;
+}
+
+.info-section h2::after {
+  content: "";
+  display: block;
+  width: 70%;
+  height: 5px;
+  background: #d4a373;
+  margin: 15px auto 0;
+  border-radius: 3px;
+}
+
+/* --- Alternating Layout (image + text) --- */
+.alt-layout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 60px 0;
+  gap: 50px;
+  flex-wrap: wrap;
+}
+
+.alt-layout.reverse {
+  flex-direction: row-reverse;
+}
+
+.alt-layout img {
+  flex: 1;
+  min-width: 320px;
+  max-width: 600px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+}
+
+.alt-layout img:hover {
+  transform: scale(1.05);
+}
+
+.alt-layout p {
+  flex: 1;
+  min-width: 280px;
+  font-size: 18px;
+  color: #444;
+  line-height: 1.8;
+  text-align: justify;
+}

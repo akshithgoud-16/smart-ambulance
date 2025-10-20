@@ -1,0 +1,144 @@
+/* Container for the whole page */
+.mybookings-page {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Page header */
+.mybookings-page h1 {
+  text-align: center;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.mybookings-page p {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #555;
+}
+
+/* Book ambulance button */
+.mybookings-page .book-btn {
+  display: inline-block;
+  background-color: #007bff;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.mybookings-page .book-btn:hover {
+  background-color: #0069d9;
+}
+
+/* Booking history section */
+.booking-history {
+  margin-top: 20px;
+}
+
+.booking-history h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* No bookings placeholder */
+.no-bookings {
+  text-align: center;
+  padding: 40px;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  border: 2px dashed #dee2e6;
+}
+
+.no-bookings h3 {
+  margin-bottom: 10px;
+  color: #555;
+}
+
+.no-bookings p {
+  margin-bottom: 15px;
+  color: #666;
+}
+
+.no-bookings .book-btn {
+  background-color: #28a745;
+}
+
+.no-bookings .book-btn:hover {
+  background-color: #218838;
+}
+
+/* Individual booking card */
+.booking-card {
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  padding: 20px;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.booking-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.booking-card-header h4 {
+  margin: 0;
+  color: #333;
+}
+
+.booking-status {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+}
+
+/* Grid for pickup and destination */
+.booking-locations {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.booking-locations p {
+  margin: 5px 0;
+  color: #666;
+}
+
+/* Booking footer */
+.booking-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.booking-footer small {
+  color: #666;
+}
+
+.booking-footer .cancel-btn {
+  background-color: #dc3545;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.booking-footer .cancel-btn:hover {
+  background-color: #c82333;
+}

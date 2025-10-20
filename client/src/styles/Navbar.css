@@ -1,0 +1,106 @@
+/* Navbar.css */
+.navbar-custom {
+  background-color: #003049; /* bluish color */
+  min-height: 64px;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+.navbar-logo {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  margin-right: 1rem !important;
+}
+
+.navbar-title {
+  font-weight: bold;
+  color: white;
+  font-size: 2rem;
+}
+
+/* Nav links */
+.nav-link {
+  color: white !important;
+  font-weight: bold;
+  font-size: 1.1rem;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  width: 0%;
+  height: 2px;
+  bottom: -5px;
+  left: 0;
+  background-color: #ffc107;
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+.nav-link:hover {
+  color: #ffd60a !important;
+}
+
+/* Sign up button */
+.btn-signup {
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  transition: all 0.3s ease;
+}
+
+.btn-signup:hover {
+  background-color: #ffd60a;
+  color: #003566;
+  transform: scale(1.05);
+}
+
+/* Navbar gap adjustments */
+.navbar-nav {
+  gap: 2.5rem;
+}
+
+@media (max-width: 992px) {
+  .navbar-nav {
+    gap: 1rem;
+  }
+}
+
+/* User icon styles */
+.user-icon {
+  font-size: 32px;
+  cursor: pointer;
+  color: white;
+  transition: transform 0.2s, color 0.2s;
+}
+
+.user-icon:hover {
+  color: #ffd60a; /* hover color */
+  transform: scale(1.1);
+}
+
+/* Logout button */
+.logout-btn {
+  color: #003566;          /* custom blue color */
+  font-weight: 700;        /* bold text */
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;            /* small space between text and icon */
+  transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+  color: #8e0101;          /* optional hover color */
+  transform: scale(1.05);
+}
+
+/* Make the logout icon slightly bolder/larger */
+.logout-icon {
+  font-weight: 900;
+  font-size: 1.1rem;
+}
