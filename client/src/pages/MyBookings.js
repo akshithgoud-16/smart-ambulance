@@ -95,23 +95,23 @@ function MyBookings({ showToast }) {
 
   return (
     <div className="mybookings-page">
-      <h1>Welcome to Smart Ambulance!</h1>
-      <p>Book ambulances and track your requests from here.</p>
+      <h1>My Ambulance Bookings</h1>
+      <p>View and manage your emergency medical transport requests</p>
       <button className="book-btn" onClick={() => navigate("/bookAmbulance")}>
-        🚑 Book Ambulance
+        🚑 Book New Ambulance
       </button>
 
       <div className="booking-history">
-        <h2>Your Booking History</h2>
+        <h2>Booking History</h2>
 
         {loading ? (
           <p>Loading your bookings...</p>
         ) : bookings.length === 0 ? (
           <div className="no-bookings">
-            <h3>No bookings yet</h3>
-            <p>Book your first ambulance to get started!</p>
+            <h3>No Bookings Found</h3>
+            <p>You haven't made any ambulance bookings yet. Start by booking your first emergency transport service.</p>
             <button className="book-btn" onClick={() => navigate("/bookAmbulance")}>
-              Book Now
+              Book Your First Ambulance
             </button>
           </div>
         ) : (
@@ -129,21 +129,21 @@ function MyBookings({ showToast }) {
 
               <div className="booking-locations">
                 <div>
-                  <strong>📍 Pickup:</strong>
+                  <strong>📍 Pickup Location:</strong>
                   <p>{booking.pickup}</p>
                 </div>
                 <div>
-                  <strong>🏥 Destination:</strong>
+                  <strong>🏥 Drop-off Location:</strong>
                   <p>{booking.destination}</p>
                 </div>
               </div>
 
               <div className="booking-footer">
                 <div>
-                  <small>Booked: {new Date(booking.timestamp).toLocaleString()}</small>
+                  <small>Booked on: {new Date(booking.timestamp).toLocaleString()}</small>
                   {booking.driver && (
                     <div>
-                      <strong>Driver:</strong> {booking.driver.username}
+                      <strong>Assigned Driver:</strong> {booking.driver.username}
                     </div>
                   )}
                 </div>

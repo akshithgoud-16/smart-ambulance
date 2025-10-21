@@ -33,12 +33,17 @@ const errorHandler = (err, req, res, next) => {
   });
 };
 
-// 404 handler
+// 404 handler with hot-update suppression
 const notFound = (req, res, next) => {
+  // Ignore webpack hot-update requests
+  if (req.url && req.url.includes('hot-update')) {
+    return res.status(204).end(); // No Content
+  }
+
+  // Normal 404 handling
   const error = new Error(`Not Found - ${req.originalUrl}`);
   res.status(404);
   next(error);
 };
 
 module.exports = { errorHandler, notFound };
-

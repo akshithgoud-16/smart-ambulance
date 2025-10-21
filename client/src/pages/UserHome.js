@@ -10,9 +10,9 @@ const Home = () => {
         <div className="hero-content">
           <div className="emergency-badge">🚨 24/7 Emergency Service</div>
           <h1 className="hero-title">
-            <span className="title-line">Fast.</span>
-            <span className="title-line">Reliable.</span>
-            <span className="title-line">Life Saving.</span>
+            <span className="title-line">Fast</span>
+            <span className="title-line">Reliable</span>
+            <span className="title-line">Life Saving</span>
           </h1>
           <p className="hero-subtitle">
             Your emergency response partner, just a click away
