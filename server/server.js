@@ -1,10 +1,11 @@
+const path = require("path");
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const passport = require("passport");
-require("dotenv").config();
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/auth");
@@ -43,6 +44,11 @@ connectDB();
 // Session setup
 const isProd = process.env.NODE_ENV === "production";
 const mongoUri = process.env.MONGODB_URI;
+
+if (!mongoUri) {
+  console.error("Missing MONGODB_URI. Check server/.env.");
+  process.exit(1);
+}
 
 // Trust proxy if behind one (needed for secure cookies over proxies)
 app.set("trust proxy", 1);
