@@ -6,6 +6,7 @@ const MongoStore = require("connect-mongo");
 const passport = require("passport");
 require("dotenv").config();
 
+const connectDB = require("./config/db");
 const authRoutes = require("./routes/auth");
 const bookingRoutes = require("./routes/bookingRoutes"); // booking routes
 const policeRoutes = require("./routes/policeRoutes");   // police routes
@@ -36,9 +37,12 @@ app.use(
   })
 );
 
+// Connect to MongoDB Atlas
+connectDB();
+
 // Session setup
 const isProd = process.env.NODE_ENV === "production";
-const mongoUri = process.env.MONGODB_URI || "mongodb://localhost:27017/smartAmbulance";
+const mongoUri = process.env.MONGODB_URI;
 
 // Trust proxy if behind one (needed for secure cookies over proxies)
 app.set("trust proxy", 1);
@@ -71,15 +75,6 @@ app.use(passport.session());
 passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
-
-// MongoDB connection
-mongoose
-  .connect(mongoUri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch((err) => console.log("❌ MongoDB error:", err));
 
 // Routes
 app.use("/api/auth", authRoutes);
