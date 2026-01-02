@@ -112,6 +112,48 @@ function BookAmbulance({ showToast }) {
     };
   }, [stopUserLocationSharing]);
 
+// Attach socket listeners as soon as booking is available
+useEffect(() => {
+  if (!currentBooking) return;
+
+  setupSocketListeners(currentBooking, {
+    onAccepted: (payload) => {
+      console.log("✅ Booking accepted", payload);
+
+      setBookingStatus("accepted");
+      setDriver(payload.driver);
+      setEstimatedTime(Math.floor(Math.random() * 15) + 5);
+      showToast("🚑 Ambulance found! Driver is on the way.", "success");
+      setIsTracking(true);
+    },
+
+    onCompleted: () => {
+      setBookingStatus("completed");
+      showToast("✅ Ride completed! Thank you for using Smart Ambulance.", "success");
+      setIsTracking(false);
+    },
+
+    onDriverLocationUpdate: async (loc) => {
+      setDriverLocation({ lat: loc.lat, lng: loc.lng });
+      mapManagerRef.current.addDriverMarker({ lat: loc.lat, lng: loc.lng });
+
+      const pickupPos = mapManagerRef.current.getPickupPosition();
+      if (pickupPos) {
+        const eta = await calculateETA(
+          { lat: loc.lat, lng: loc.lng },
+          pickupPos
+        );
+        if (eta) setEstimatedTime(eta);
+      }
+    },
+
+    setUserLocation
+  });
+}, [currentBooking, setupSocketListeners, showToast]);
+
+
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -148,35 +190,7 @@ function BookAmbulance({ showToast }) {
       showToast("🔍 Searching for nearby ambulance...", "info");
 
       // Setup socket listeners
-      setupSocketListeners(data.booking, {
-        onAccepted: (payload) => {
-        setBookingStatus("accepted");
-        setDriver(payload.driver);
-        setEstimatedTime(Math.floor(Math.random() * 15) + 5);
-        showToast("🚑 Ambulance found! Driver is on the way.", "success");
-        setIsTracking(true);
-        },
-        onCompleted: (payload) => {
-        setBookingStatus("completed");
-        showToast("✅ Ride completed! Thank you for using Smart Ambulance.", "success");
-        setIsTracking(false);
-        },
-        onDriverLocationUpdate: async (loc) => {
-          setDriverLocation({ lat: loc.lat, lng: loc.lng });
-          mapManagerRef.current.addDriverMarker({ lat: loc.lat, lng: loc.lng });
-          
-          // Update ETA based on driver location
-          const pickupPos = mapManagerRef.current.getPickupPosition();
-          if (pickupPos) {
-            const eta = await calculateETA(
-              { lat: loc.lat, lng: loc.lng },
-              pickupPos
-            );
-            if (eta) setEstimatedTime(eta);
-          }
-        },
-        setUserLocation
-      });
+     
 
     } catch (err) {
       console.error(err);

@@ -49,17 +49,17 @@ export const useBookingSocket = (currentBooking, showToast) => {
     const { onAccepted, onCompleted, onDriverLocationUpdate, setUserLocation } = callbacks;
 
     // Subscribe to booking room for real-time updates
-    joinBookingRoom(booking._id, "user");
+    joinBookingRoom(String(booking._id), "user");
 
     // Socket listeners
     onBookingAccepted((payload) => {
-      if (!payload || payload.bookingId !== booking._id) return;
+      if (!payload || payload.bookingId !== String(booking._id)) return;
       onAccepted(payload);
       startUserLocationSharing(setUserLocation);
     });
 
     onBookingCompleted((payload) => {
-      if (!payload || payload.bookingId !== booking._id) return;
+      if (!payload || payload.bookingId !== String(booking._id)) return;
       onCompleted(payload);
       stopUserLocationSharing();
     });
