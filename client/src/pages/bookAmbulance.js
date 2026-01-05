@@ -39,12 +39,6 @@ function BookAmbulance({ showToast }) {
       mapManagerRef.current = new MapManager(mapRef, showToast);
     }
 
-    // set current refs to the latest callbacks
-    handleMapClickRef.current = handleMapClick;
-    handlePickupSelectedRef.current = handlePickupSelected;
-    handleDestinationSelectedRef.current = handleDestinationSelected;
-    captureCurrentLocationRef.current = captureCurrentLocation;
-
     const stableMapClickHandler = (loc) => {
       if (handleMapClickRef.current) handleMapClickRef.current(loc);
     };
@@ -53,10 +47,11 @@ function BookAmbulance({ showToast }) {
     if (window.google) {
       mapManagerRef.current.initializeMap(stableMapClickHandler);
 
+      // Initialize destination autocomplete (always visible)
       initializeAutocomplete(
-        "manual-location-input",
+        null, // Don't initialize pickup yet, as it's conditionally rendered
         "destination-input",
-        (address, loc) => { if (handlePickupSelectedRef.current) handlePickupSelectedRef.current(address, loc); },
+        null,
         (address, loc) => { if (handleDestinationSelectedRef.current) handleDestinationSelectedRef.current(address, loc); }
       );
     }
@@ -72,7 +67,7 @@ function BookAmbulance({ showToast }) {
     destination,
     setDestination,
     locationMode,
-    manualClickState,
+    manualClickState, // eslint-disable-line no-unused-vars
     captureCurrentLocation,
     handleMapClick,
     toggleLocationMode,
@@ -83,11 +78,42 @@ function BookAmbulance({ showToast }) {
 
   const { setupSocketListeners, stopUserLocationSharing } = useBookingSocket(currentBooking, showToast);
 
+  // Keep refs updated with latest callback versions
+  useEffect(() => {
+    handleMapClickRef.current = handleMapClick;
+    handlePickupSelectedRef.current = handlePickupSelected;
+    handleDestinationSelectedRef.current = handleDestinationSelected;
+    captureCurrentLocationRef.current = captureCurrentLocation;
+  }, [handleMapClick, handlePickupSelected, handleDestinationSelected, captureCurrentLocation]);
+
   // When the user switches to 'auto' mode, capture current location. We use a ref to call
   // the latest version of captureCurrentLocation without re-initializing the map.
   useEffect(() => {
     if (locationMode === "auto" && captureCurrentLocationRef.current) {
       captureCurrentLocationRef.current();
+    }
+    // When switching to manual mode, initialize pickup autocomplete
+    if (locationMode === "manual" && window.google) {
+      setTimeout(() => {
+        const pickupInput = document.getElementById("manual-location-input");
+        if (pickupInput && !pickupInput.autocompleteInitialized) {
+          const pickupAutocomplete = new window.google.maps.places.Autocomplete(pickupInput, {
+            types: ["establishment", "geocode"],
+            componentRestrictions: { country: "in" },
+          });
+          pickupAutocomplete.addListener("place_changed", () => {
+            const place = pickupAutocomplete.getPlace();
+            if (place.geometry && handlePickupSelectedRef.current) {
+              const loc = {
+                lat: place.geometry.location.lat(),
+                lng: place.geometry.location.lng(),
+              };
+              handlePickupSelectedRef.current(place.formatted_address, loc);
+            }
+          });
+          pickupInput.autocompleteInitialized = true;
+        }
+      }, 100);
     }
   }, [locationMode]);
 
@@ -102,10 +128,11 @@ function BookAmbulance({ showToast }) {
 
   // Cleanup on unmount
   useEffect(() => {
+    // Copy ref values to variables inside the effect
+    const statusInterval = statusPollingRef.current;
+    const driverLocationInterval = driverLocationPollingRef.current;
+    
     return () => {
-      const statusInterval = statusPollingRef.current;
-      const driverLocationInterval = driverLocationPollingRef.current;
-      
       if (statusInterval) clearInterval(statusInterval);
       if (driverLocationInterval) clearInterval(driverLocationInterval);
       stopUserLocationSharing();
@@ -157,18 +184,30 @@ useEffect(() => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!mapManagerRef.current) {
+      showToast("⚠ Map is not ready yet. Please wait a moment.", "error");
+      return;
+    }
+
     const pickupPosition = mapManagerRef.current.getPickupPosition();
     if (!pickupPosition) {
       showToast("⚠ Please set your pickup location first!", "error");
       return;
     }
+
     if (!destination.trim()) {
       showToast("⚠ Please enter a destination!", "error");
       return;
     }
 
     try {
-      // Validate and get destination coordinates
+      // Optimistically enter searching state so the user gets feedback immediately
+      setBookingStatus("searching");
+      setSearchingTime(0);
+      showToast("🔍 Searching for nearby ambulance...", "info");
+      // Fallback toast in case rendering timing swallows the first one
+      setTimeout(() => showToast("🔍 Searching for nearby ambulance...", "info"), 25);
+
       const destCoords = await validateAndGetDestinationCoords();
 
       const bookingData = {
@@ -181,19 +220,11 @@ useEffect(() => {
       };
 
       const data = await createBooking(bookingData);
-      console.log("Booking response:", data);
 
-      // Start the booking process
       setCurrentBooking(data.booking);
-      setBookingStatus("searching");
-      setSearchingTime(0);
-      showToast("🔍 Searching for nearby ambulance...", "info");
-
-      // Setup socket listeners
-     
-
     } catch (err) {
       console.error(err);
+      setBookingStatus(null);
       showToast("❌ " + err.message, "error");
     }
   };

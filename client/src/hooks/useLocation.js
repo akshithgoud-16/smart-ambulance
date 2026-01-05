@@ -18,12 +18,16 @@ export const useLocation = (mapManagerRef, showToast) => {
       // Reverse geocode to get actual address instead of "My Location"
       const address = await reverseGeocode(position);
       setPickup(address);
+
+      const notifyPickupSet = () => showToast("📍 Using your current location as pickup.", "info");
+
       // Wait for map manager instance to be ready before adding markers
       const ensureMapAndAdd = () => {
         const mm = mapManagerRef && mapManagerRef.current;
         if (mm && mm.mapInstance) {
           mm.addPickupMarker(position);
           setManualClickState(prev => ({ ...prev, pickupSet: true }));
+          notifyPickupSet();
           return true;
         }
         return false;
@@ -38,8 +42,6 @@ export const useLocation = (mapManagerRef, showToast) => {
             clearInterval(timer);
           }
         }, 200);
-      } else {
-        // already set manual click state in ensureMapAndAdd
       }
     } catch (err) {
       showToast("Failed to get your current location.", "error");
