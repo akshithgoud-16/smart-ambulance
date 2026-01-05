@@ -4,7 +4,7 @@ let socketInstance = null;
 
 export function getSocket() {
   if (!socketInstance) {
-    socketInstance = io("http://localhost:5000", {
+    socketInstance = io("http://192.168.0.5:5000", {
       withCredentials: true,
       transports: ["websocket"],
     });
