@@ -1,6 +1,15 @@
 const mongoose = require("mongoose");
 const passportLocalMongoose = require("passport-local-mongoose");
 
+const LocationSchema = new mongoose.Schema(
+  {
+    lat: { type: Number },
+    lng: { type: Number },
+    label: { type: String, trim: true },
+  },
+  { _id: false }
+);
+
 const UserSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -17,6 +26,13 @@ const UserSchema = new mongoose.Schema({
     enum: ["user", "driver", "police"],
     default: "user",
   },
+  displayName: { type: String, trim: true },
+  dob: { type: Date },
+  station: { type: String, trim: true },
+  area: { type: String, trim: true },
+  pincode: { type: String, trim: true },
+  profilePhoto: { type: String }, // data URL or remote URL
+  currentLocation: LocationSchema,
 });
 
 UserSchema.plugin(passportLocalMongoose);

@@ -13,6 +13,7 @@ import ContactUs from "./pages/contactUs";
 import MyBookings from "./pages/MyBookings";
 import DriverDashboard from "./pages/DriverDashboard";
 import PoliceDashboard from "./pages/PoliceDashboard";
+import PoliceProfile from "./pages/PoliceProfile";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Toast from "./components/Toast";
@@ -55,6 +56,16 @@ function App() {
         <Route path="/police" element={
           <ProtectedRoute allowedRoles={["police"]}>
             <PoliceDashboard showToast={showToast} />
+          </ProtectedRoute>
+        }/>
+        <Route path="/police/bookings" element={
+          <ProtectedRoute allowedRoles={["police"]}>
+            <PoliceDashboard showToast={showToast} />
+          </ProtectedRoute>
+        }/>
+        <Route path="/police/profile" element={
+          <ProtectedRoute allowedRoles={["police"]}>
+            <PoliceProfile showToast={showToast} />
           </ProtectedRoute>
         }/>
       </Routes>

@@ -30,10 +30,7 @@ function LiveTracking({ showToast }) {
   const [booking, setBooking] = useState(initialBooking);
   const [driver, setDriver] = useState(initialDriver);
   const [status, setStatus] = useState(initialBooking?.status || "accepted");
-  const [driverLocation, setDriverLocation] = useState(null);
-  const [userLocation, setUserLocation] = useState(null);
   const [eta, setEta] = useState(null);
-  const [lastDriverPing, setLastDriverPing] = useState(null);
   const [loading, setLoading] = useState(!initialBooking);
 
   const mapRef = useRef(null);
@@ -98,7 +95,6 @@ function LiveTracking({ showToast }) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          setUserLocation(loc);
           emitUserLocation(String(bookingId), loc.lat, loc.lng);
         },
         () => {
@@ -132,9 +128,6 @@ function LiveTracking({ showToast }) {
 
     const handleDriverLocation = async (loc) => {
       if (!loc || typeof loc.lat !== "number" || typeof loc.lng !== "number") return;
-
-      setDriverLocation({ lat: loc.lat, lng: loc.lng });
-      setLastDriverPing(loc.timestamp || Date.now());
 
       if (mapManagerRef.current) {
         mapManagerRef.current.addDriverMarker({ lat: loc.lat, lng: loc.lng });
