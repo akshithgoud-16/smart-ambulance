@@ -7,6 +7,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Auth from "./pages/Auth";
 import UserHome from "./pages/UserHome";
 import BookAmbulance from "./pages/bookAmbulance";
+import LiveTracking from "./pages/LiveTracking";
 import Help from "./pages/help";
 import ContactUs from "./pages/contactUs";
 import MyBookings from "./pages/MyBookings";
@@ -42,6 +43,7 @@ function App() {
         <Route path="/" element={<UserHome showToast={showToast} />} />
         <Route path="/auth" element={<Auth setIsLoggedIn={setIsLoggedIn} />} />
         <Route path="/bookAmbulance" element={<BookAmbulance showToast={showToast} />} />
+        <Route path="/track/:bookingId" element={<LiveTracking showToast={showToast} />} />
         <Route path="/help" element={<Help />} />
         <Route path="/contactUs" element={<ContactUs />} />
         <Route path="/MyBookings" element={<MyBookings showToast={showToast} />} />

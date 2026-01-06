@@ -156,6 +156,15 @@ function MyBookings({ showToast }) {
                     Cancel Booking
                   </button>
                 )}
+
+                {booking.status === "accepted" && (
+                  <button
+                    className="track-btn"
+                    onClick={() => navigate(`/track/${booking._id}`, { state: { booking } })}
+                  >
+                    Track Ambulance
+                  </button>
+                )}
               </div>
             </div>
           ))

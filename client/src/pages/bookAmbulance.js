@@ -1,9 +1,10 @@
 // src/pages/BookAmbulance.js - Refactored
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { MapManager, initializeAutocomplete } from "../utils/mapUtils";
 import { useLocation } from "../hooks/useLocation";
 import { useBookingSocket } from "../hooks/useBookingSocket";
-import { createBooking } from "../services/bookingService";
+import { createBooking, getBookingById } from "../services/bookingService";
 import { calculateETA } from "../services/locationService";
 import { SearchingOverlay, DriverPanel } from "../components/BookingStatus";
 import "../styles/bookAmbulance.css";
@@ -24,6 +25,7 @@ function BookAmbulance({ showToast }) {
   const mapManagerRef = useRef(null);
   const statusPollingRef = useRef(null);
   const driverLocationPollingRef = useRef(null);
+  const navigate = useNavigate();
 
   // Stable refs for passing latest callbacks into the map listener
   const handleMapClickRef = useRef(null);
@@ -152,6 +154,21 @@ useEffect(() => {
       setEstimatedTime(Math.floor(Math.random() * 15) + 5);
       showToast("🚑 Ambulance found! Driver is on the way.", "success");
       setIsTracking(true);
+
+      const payloadBookingId =
+        payload?.bookingId ||
+        payload?.booking?._id ||
+        payload?._id ||
+        currentBooking?._id;
+
+      if (payloadBookingId) {
+        navigate(`/track/${payloadBookingId}`, {
+          state: {
+            booking: currentBooking || payload.booking,
+            driver: payload.driver,
+          },
+        });
+      }
     },
 
     onCompleted: () => {
@@ -176,7 +193,34 @@ useEffect(() => {
 
     setUserLocation
   });
-}, [currentBooking, setupSocketListeners, showToast]);
+}, [currentBooking, navigate, setupSocketListeners, showToast]);
+
+  // Fallback polling in case socket event is missed
+  useEffect(() => {
+    if (!currentBooking || bookingStatus !== "searching") return;
+
+    const poll = async () => {
+      try {
+        const latest = await getBookingById(currentBooking._id);
+        if (latest.status === "accepted") {
+          setBookingStatus("accepted");
+          setDriver(latest.driver);
+          navigate(`/track/${latest._id}`, { state: { booking: latest, driver: latest.driver } });
+        }
+        if (latest.status === "completed" || latest.status === "cancelled") {
+          setBookingStatus(latest.status);
+        }
+      } catch (err) {
+        // swallow errors to keep polling lightweight
+      }
+    };
+
+    statusPollingRef.current = setInterval(poll, 4000);
+    return () => {
+      if (statusPollingRef.current) clearInterval(statusPollingRef.current);
+      statusPollingRef.current = null;
+    };
+  }, [bookingStatus, currentBooking, navigate]);
 
 
 

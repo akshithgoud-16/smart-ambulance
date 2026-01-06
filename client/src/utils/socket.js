@@ -2,9 +2,13 @@ import { io } from "socket.io-client";
 
 let socketInstance = null;
 
+const SOCKET_URL =
+  process.env.REACT_APP_SOCKET_URL ||
+  `${window.location.protocol}//${window.location.hostname}:5000`;
+
 export function getSocket() {
   if (!socketInstance) {
-    socketInstance = io("http://192.168.0.5:5000", {
+    socketInstance = io(SOCKET_URL, {
       withCredentials: true,
       transports: ["websocket"],
     });

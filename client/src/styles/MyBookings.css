@@ -286,6 +286,30 @@ p {
   transform: translateY(-1px);
 }
 
+.track-btn {
+  background: #1d3557;
+  color: white;
+  padding: 12px 26px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 8px 20px rgba(29, 53, 87, 0.25);
+  transition: all 0.2s ease;
+}
+
+.track-btn:hover {
+  background: #27496d;
+  transform: translateY(-2px);
+}
+
+.track-btn:active {
+  transform: translateY(-1px);
+}
+
 /* Loading state */
 .booking-history > p {
   text-align: center;

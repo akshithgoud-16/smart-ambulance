@@ -1,5 +1,20 @@
 const Booking = require("../models/Booking");
 
+// Get single booking for the authenticated user
+const getBookingById = async (req, res) => {
+  try {
+    const booking = await Booking.findOne({ _id: req.params.id, user: req.user._id })
+      .populate("user", "username email")
+      .populate("driver", "username email");
+
+    if (!booking) return res.status(404).json({ message: "Booking not found" });
+
+    res.json(booking);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 // Get all pending bookings (for drivers)
 const getPendingBookings = async (req, res) => {
   try {
@@ -79,4 +94,4 @@ const getDriverBookings = async (req, res) => {
   }
 };
 
-module.exports = { getPendingBookings, acceptBooking, completeBooking, getDriverBookings };
+module.exports = { getBookingById, getPendingBookings, acceptBooking, completeBooking, getDriverBookings };

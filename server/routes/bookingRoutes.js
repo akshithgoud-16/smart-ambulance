@@ -2,7 +2,13 @@ const express = require("express");
 const router = express.Router();
 const Booking = require("../models/Booking");
 const { isAuthenticated, isDriver } = require("../middleware/authMiddleware");
-const { getPendingBookings, acceptBooking, completeBooking, getDriverBookings } = require("../controllers/bookingController");
+const {
+  getBookingById,
+  getPendingBookings,
+  acceptBooking,
+  completeBooking,
+  getDriverBookings
+} = require("../controllers/bookingController");
 
 // ---------------- User Routes ----------------
 
@@ -53,5 +59,8 @@ router.put("/:id/accept", isAuthenticated, isDriver, acceptBooking);
 
 // PUT /api/bookings/:id/complete → complete a booking
 router.put("/:id/complete", isAuthenticated, isDriver, completeBooking);
+
+// GET /api/bookings/:id → fetch one booking (for user)
+router.get("/:id", isAuthenticated, getBookingById);
 
 module.exports = router;

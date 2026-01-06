@@ -18,3 +18,15 @@ export const createBooking = async (bookingData) => {
 
   return await res.json();
 };
+
+export const getBookingById = async (bookingId) => {
+  const res = await fetch(`/api/bookings/${bookingId}`, {
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    throw new Error("Unable to load booking details");
+  }
+
+  return await res.json();
+};
