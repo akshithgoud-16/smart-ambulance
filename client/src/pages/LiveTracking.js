@@ -234,28 +234,7 @@ function LiveTracking({ showToast }) {
             </div>
           </section>
 
-          <section className="info-card">
-            <div className="info-title">Live Locations</div>
-            {driverLocation ? (
-              <div className="coord-row">
-                <span className="pill soft">Driver</span>
-                <span>{driverLocation.lat.toFixed(6)}, {driverLocation.lng.toFixed(6)}</span>
-                {lastDriverPing && (
-                  <small className="muted">Updated {new Date(lastDriverPing).toLocaleTimeString()}</small>
-                )}
-              </div>
-            ) : (
-              <p className="muted">Waiting for driver location...</p>
-            )}
-
-            {userLocation && (
-              <div className="coord-row">
-                <span className="pill soft">You</span>
-                <span>{userLocation.lat.toFixed(6)}, {userLocation.lng.toFixed(6)}</span>
-                <small className="muted">Sharing with driver</small>
-              </div>
-            )}
-          </section>
+         
 
           <section className="info-card actions">
             <button className="outline" onClick={() => navigate("/MyBookings")}>Back to My Bookings</button>
