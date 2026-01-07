@@ -2,54 +2,116 @@ import { io } from "socket.io-client";
 
 let socketInstance = null;
 
+// Backend socket URL
 const SOCKET_URL =
   process.env.REACT_APP_SOCKET_URL ||
   `${window.location.protocol}//${window.location.hostname}:5000`;
 
+/**
+ * Get or create socket instance
+ */
 export function getSocket() {
   if (!socketInstance) {
     socketInstance = io(SOCKET_URL, {
       withCredentials: true,
       transports: ["websocket"],
     });
+
+    socketInstance.on("connect", () => {
+      console.log("🔌 Socket connected:", socketInstance.id);
+    });
+
+    socketInstance.on("disconnect", () => {
+      console.log("❌ Socket disconnected");
+    });
   }
   return socketInstance;
 }
 
+/**
+ * -----------------------------
+ * BOOKING ROOMS (User / Driver)
+ * -----------------------------
+ */
+
+// Join booking room (user or driver)
 export function joinBookingRoom(bookingId, role) {
   const socket = getSocket();
   socket.emit("booking:subscribe", { bookingId, role });
+  console.log(`📦 ${role} joined booking:${bookingId}`);
 }
 
+// Booking accepted
 export function onBookingAccepted(handler) {
   const socket = getSocket();
+  socket.off("booking:accepted"); // prevent duplicates
   socket.on("booking:accepted", handler);
 }
 
+// Booking completed
 export function onBookingCompleted(handler) {
   const socket = getSocket();
+  socket.off("booking:completed");
   socket.on("booking:completed", handler);
 }
 
+/**
+ * -----------------------------
+ * DRIVER ↔ USER LOCATION
+ * -----------------------------
+ */
+
+// Receive driver location
 export function onDriverLocation(handler) {
   const socket = getSocket();
+  socket.off("driver:location");
   socket.on("driver:location", handler);
 }
 
+// Driver sends location
 export function emitDriverLocation(bookingId, lat, lng) {
   const socket = getSocket();
   socket.emit("driver:location", { bookingId, lat, lng });
 }
 
+// User sends location
 export function emitUserLocation(bookingId, lat, lng) {
   const socket = getSocket();
   socket.emit("user:location", { bookingId, lat, lng });
 }
 
+// Driver receives user location
 export function onUserLocation(handler) {
   const socket = getSocket();
+  socket.off("user:location");
   socket.on("user:location", handler);
 }
+
+/**
+ * -----------------------------
+ * POLICE ROOMS (CRITICAL FIX)
+ * -----------------------------
+ */
+
+// Police joins OWN isolated room
+export function joinPoliceRoom(policeId) {
+  const socket = getSocket();
+  socket.emit("police:join", policeId);
+  console.log(`👮 Joined police room: police:${policeId}`);
+}
+
+// Police receives ambulance alert
+export function onPoliceAlert(handler) {
+  const socket = getSocket();
+  socket.off("police:ambulance-alert");
+  socket.on("police:ambulance-alert", handler);
+}
+
+/**
+ * -----------------------------
+ * DISCONNECT
+ * -----------------------------
+ */
 
 export function disconnectSocket() {
   if (socketInstance) {
@@ -57,5 +119,3 @@ export function disconnectSocket() {
     socketInstance = null;
   }
 }
-
-

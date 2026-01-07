@@ -9,9 +9,9 @@ require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/auth");
-const bookingRoutes = require("./routes/bookingRoutes"); // booking routes
-const policeRoutes = require("./routes/policeRoutes");   // police routes
-const userRoutes = require("./routes/userRoutes");       // user routes
+const bookingRoutes = require("./routes/bookingRoutes");
+const policeRoutes = require("./routes/policeRoutes");
+const userRoutes = require("./routes/userRoutes");
 const { errorHandler, notFound } = require("./middleware/errorMiddleware");
 
 const app = express();
@@ -50,7 +50,6 @@ if (!mongoUri) {
   process.exit(1);
 }
 
-// Trust proxy if behind one (needed for secure cookies over proxies)
 app.set("trust proxy", 1);
 
 app.use(
@@ -61,13 +60,13 @@ app.use(
     saveUninitialized: false,
     store: MongoStore.create({
       mongoUrl: mongoUri,
-      ttl: 60 * 60 * 24, // 1 day
+      ttl: 60 * 60 * 24,
       autoRemove: "native",
     }),
     cookie: {
       httpOnly: true,
       sameSite: isProd ? "none" : "lax",
-      secure: isProd, // true only in production over HTTPS
+      secure: isProd,
       maxAge: 24 * 60 * 60 * 1000,
     },
   })
@@ -84,9 +83,9 @@ passport.deserializeUser(User.deserializeUser());
 
 // Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/bookings", bookingRoutes); // booking API
-app.use("/api/police", policeRoutes);    // police API
-app.use("/api/users", userRoutes);       // user API
+app.use("/api/bookings", bookingRoutes);
+app.use("/api/police", policeRoutes);
+app.use("/api/users", userRoutes);
 
 // Example protected route
 app.get("/api/profile", (req, res) => {
@@ -97,35 +96,60 @@ app.get("/api/profile", (req, res) => {
   }
 });
 
-// Error handling middleware (must be last)
+// Error handling middleware
 app.use(notFound);
 app.use(errorHandler);
 
-// Start server
-const PORT = process.env.PORT || 5000;
-
 // Socket.io handlers
 io.on("connection", (socket) => {
+  console.log("🔌 Socket connected:", socket.id);
+
   // Client subscribes to a booking room
   socket.on("booking:subscribe", ({ bookingId, role }) => {
     if (!bookingId) return;
     const room = `booking:${bookingId}`;
     socket.join(room);
+    console.log(`📦 ${role} joined ${room}`);
+  });
+
+  // ================================
+  // ✅ NEW: Police joins OWN room
+  // ================================
+  socket.on("police:join", (policeId) => {
+    if (!policeId) return;
+    socket.join(`police:${policeId}`);
+    console.log(`👮 Police joined room police:${policeId}`);
   });
 
   // Driver shares live location
   socket.on("driver:location", ({ bookingId, lat, lng }) => {
     if (!bookingId || typeof lat !== "number" || typeof lng !== "number") return;
     const room = `booking:${bookingId}`;
-    io.to(room).emit("driver:location", { lat, lng, timestamp: Date.now() });
+    io.to(room).emit("driver:location", {
+      lat,
+      lng,
+      timestamp: Date.now(),
+    });
   });
 
   // User shares live location
   socket.on("user:location", ({ bookingId, lat, lng }) => {
     if (!bookingId || typeof lat !== "number" || typeof lng !== "number") return;
     const room = `booking:${bookingId}`;
-    io.to(room).emit("user:location", { lat, lng, timestamp: Date.now() });
+    io.to(room).emit("user:location", {
+      lat,
+      lng,
+      timestamp: Date.now(),
+    });
+  });
+
+  socket.on("disconnect", () => {
+    console.log("❌ Socket disconnected:", socket.id);
   });
 });
 
-server.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+// Start server
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () =>
+  console.log(`🚀 Server running on http://localhost:${PORT}`)
+);

@@ -22,6 +22,10 @@ const bookingSchema = new mongoose.Schema({
     default: "pending",
   },
   timestamp: { type: Date, default: Date.now },
+  alertedPolice: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  }],
 });
 
 module.exports = mongoose.model("Booking", bookingSchema);
