@@ -1,7 +1,9 @@
 const polyline = require("@mapbox/polyline");
 const User = require("../models/User");
 const Booking = require("../models/Booking");
-const { distanceInMeters } = require("../utils/geoUtils");
+
+// 🔽 CHANGE 1: import correct function
+const { distancePointToSegment } = require("../utils/geoUtils");
 
 async function notifyPoliceIfRoutePasses(booking, encodedPolyline, io) {
   if (!encodedPolyline || !io) return;
@@ -11,7 +13,7 @@ async function notifyPoliceIfRoutePasses(booking, encodedPolyline, io) {
     .decode(encodedPolyline)
     .map(([lat, lng]) => ({ lat, lng }));
 
-  // ✅ FETCH POLICE FROM USER MODEL
+  // Fetch police users with saved locations
   const policeUsers = await User.find({
     role: "police",
     "currentLocation.lat": { $exists: true },
@@ -26,29 +28,33 @@ async function notifyPoliceIfRoutePasses(booking, encodedPolyline, io) {
       continue;
     }
 
-    const radius = 150; // meters (fixed radius for now)
+    // 🔽 CHANGE 2: precise radius
+    const radius = 150; // meters
 
     let minDistance = Infinity;
 
-    for (let i = 0; i < routePoints.length; i += 5) {
-      const p = routePoints[i];
+    // 🔽 CHANGE 3: segment-by-segment check (NO SKIP)
+    for (let i = 0; i < routePoints.length - 1; i++) {
+      const d = distancePointToSegment(
+        { lat, lng },                 // police
+        routePoints[i],               // segment start
+        routePoints[i + 1]            // segment end
+      );
 
-      const d = distanceInMeters(p.lat, p.lng, lat, lng);
-      minDistance = Math.min(minDistance, d);
+      if (d < minDistance) minDistance = d;
     }
 
-    // 🔍 DEBUG LOG
+    // 🔍 DEBUG
     console.log(
       `Police ${police._id} → minDistance = ${minDistance.toFixed(2)} m`
     );
 
-    // ✅ STRICT FILTER
+    // ✅ Notify ONLY if inside radius
     if (minDistance <= radius) {
       console.log(`🚨 NOTIFY police ${police._id}`);
 
-      // Add police to alertedPolice array
       await Booking.findByIdAndUpdate(booking._id, {
-        $addToSet: { alertedPolice: police._id }
+        $addToSet: { alertedPolice: police._id },
       });
 
       io.to(`police:${police._id}`).emit("police:ambulance-alert", {
