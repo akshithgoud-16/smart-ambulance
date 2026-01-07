@@ -31,6 +31,7 @@ const UserSchema = new mongoose.Schema({
   station: { type: String, trim: true },
   area: { type: String, trim: true },
   pincode: { type: String, trim: true },
+  vehicleNumber: { type: String, trim: true },
   profilePhoto: { type: String }, // data URL or remote URL
   currentLocation: LocationSchema,
 });
