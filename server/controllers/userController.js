@@ -38,6 +38,7 @@ const updateUserProfile = async (req, res) => {
       station,
       area,
       pincode,
+      vehicleNumber,
       profilePhoto,
       currentLocation,
     } = req.body;
@@ -61,6 +62,9 @@ const updateUserProfile = async (req, res) => {
     }
     if (typeof pincode === "string") {
       updates.pincode = pincode.trim();
+    }
+    if (typeof vehicleNumber === "string") {
+      updates.vehicleNumber = vehicleNumber.trim();
     }
     if (profilePhoto !== undefined) {
       updates.profilePhoto = profilePhoto;

@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 // Pages & Components
 import Auth from "./pages/Auth";
 import UserHome from "./pages/UserHome";
+import HomeRouter from "./pages/HomeRouter";
 import BookAmbulance from "./pages/bookAmbulance";
 import LiveTracking from "./pages/LiveTracking";
 import Help from "./pages/help";
@@ -14,6 +15,7 @@ import MyBookings from "./pages/MyBookings";
 import DriverDashboard from "./pages/DriverDashboard";
 import PoliceDashboard from "./pages/PoliceDashboard";
 import PoliceProfile from "./pages/PoliceProfile";
+import DriverProfile from "./pages/DriverProfile";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Toast from "./components/Toast";
@@ -41,7 +43,7 @@ function App() {
 
       {/* Routes */}
       <Routes>
-        <Route path="/" element={<UserHome showToast={showToast} />} />
+        <Route path="/" element={<HomeRouter showToast={showToast} />} />
         <Route path="/auth" element={<Auth setIsLoggedIn={setIsLoggedIn} />} />
         <Route path="/bookAmbulance" element={<BookAmbulance showToast={showToast} />} />
         <Route path="/track/:bookingId" element={<LiveTracking showToast={showToast} />} />
@@ -51,6 +53,11 @@ function App() {
         <Route path="/driver" element={
           <ProtectedRoute allowedRoles={["driver"]}>
             <DriverDashboard showToast={showToast} />
+          </ProtectedRoute>
+        }/>
+        <Route path="/driver/profile" element={
+          <ProtectedRoute allowedRoles={["driver"]}>
+            <DriverProfile showToast={showToast} />
           </ProtectedRoute>
         }/>
         <Route path="/police" element={
