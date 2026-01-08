@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const { isAuthenticated } = require("../middleware/authMiddleware");
+const { isAuthenticated, isDriver } = require("../middleware/authMiddleware");
 const {
+  setDriverDutyStatus,
   getUserProfile,
   getUserBookings,
   updateUserProfile,
@@ -10,6 +11,9 @@ const {
 
 // GET /api/users/profile - Get user profile
 router.get("/profile", isAuthenticated, getUserProfile);
+
+// PUT /api/users/duty - Set driver duty toggle
+router.put("/duty", isAuthenticated, isDriver, setDriverDutyStatus);
 
 // GET /api/users/bookings - Get user's booking history
 router.get("/bookings", isAuthenticated, getUserBookings);

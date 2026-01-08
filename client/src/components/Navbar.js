@@ -56,7 +56,7 @@ function Navbar({ isLoggedIn, setIsLoggedIn }) {
     ],
     driver: [
       { name: "Dashboard", path: "/driver" },
-      { name: "Assigned Requests", path: "/driver/assigned" },
+      { name: "Booking History", path: "/driver/history" },
       { name: "Profile", path: "/driver/profile" },
     ],
     police: [

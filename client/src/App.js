@@ -13,6 +13,7 @@ import Help from "./pages/help";
 import ContactUs from "./pages/contactUs";
 import MyBookings from "./pages/MyBookings";
 import DriverDashboard from "./pages/DriverDashboard";
+import DriverHistory from "./pages/DriverHistory";
 import PoliceDashboard from "./pages/PoliceDashboard";
 import PoliceProfile from "./pages/PoliceProfile";
 import DriverProfile from "./pages/DriverProfile";
@@ -53,6 +54,11 @@ function App() {
         <Route path="/driver" element={
           <ProtectedRoute allowedRoles={["driver"]}>
             <DriverDashboard showToast={showToast} />
+          </ProtectedRoute>
+        }/>
+        <Route path="/driver/history" element={
+          <ProtectedRoute allowedRoles={["driver"]}>
+            <DriverHistory showToast={showToast} />
           </ProtectedRoute>
         }/>
         <Route path="/driver/profile" element={

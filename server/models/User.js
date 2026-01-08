@@ -34,6 +34,7 @@ const UserSchema = new mongoose.Schema({
   vehicleNumber: { type: String, trim: true },
   profilePhoto: { type: String }, // data URL or remote URL
   currentLocation: LocationSchema,
+  onDuty: { type: Boolean, default: false },
 });
 
 UserSchema.plugin(passportLocalMongoose);

@@ -1,4 +1,5 @@
 const Booking = require("../models/Booking");
+const User = require("../models/User");
 
 // 🔽 ADDED IMPORTS (ONLY THESE)
 const { notifyPoliceIfRoutePasses } = require("../services/policeAlertService");
@@ -33,6 +34,11 @@ const getPendingBookings = async (req, res) => {
 // ✅ ACCEPT BOOKING (ONLY THIS FUNCTION IS MODIFIED)
 const acceptBooking = async (req, res) => {
   try {
+    const driver = await User.findById(req.user._id).select("onDuty");
+    if (!driver?.onDuty) {
+      return res.status(403).json({ message: "Driver must be on duty to accept bookings" });
+    }
+
     const booking = await Booking.findByIdAndUpdate(
       req.params.id,
       { status: "accepted", driver: req.user._id },

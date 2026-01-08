@@ -1,6 +1,32 @@
 const User = require("../models/User");
 const Booking = require("../models/Booking");
 
+// ✅ Set driver duty status
+const setDriverDutyStatus = async (req, res) => {
+  try {
+    const { onDuty } = req.body;
+    if (typeof onDuty !== "boolean") {
+      return res.status(400).json({ message: "onDuty must be boolean" });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { onDuty },
+      { new: true, runValidators: true }
+    ).select("-hash -salt");
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // keep session in sync for this request lifecycle
+    req.user.onDuty = onDuty;
+
+    res.json({ message: onDuty ? "Driver is now on duty" : "Driver is off duty", user });
+  } catch (err) {
+    console.error("Error updating duty status:", err);
+    res.status(500).json({ message: "Failed to update duty status" });
+  }
+};
+
 // ✅ Get user profile
 const getUserProfile = async (req, res) => {
   try {
@@ -135,6 +161,7 @@ const cancelBooking = async (req, res) => {
 };
 
 module.exports = {
+  setDriverDutyStatus,
   getUserProfile,
   getUserBookings,
   updateUserProfile,
