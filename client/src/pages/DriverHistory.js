@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../styles/driversAndPolice.css";
+import "../styles/driver.css";
 
 const DriverHistory = ({ showToast }) => {
   const [bookings, setBookings] = useState([]);

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { joinBookingRoom, emitDriverLocation, onUserLocation } from "../utils/socket";
-import "../styles/driversAndPolice.css";
+import "../styles/driver.css";
 
 const DriverDashboard = ({ showToast }) => {
   const [onDuty, setOnDuty] = useState(false);

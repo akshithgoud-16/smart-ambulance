@@ -1,0 +1,354 @@
+/* === Police Dashboard Styles === */
+
+.police-dashboard {
+  padding: 30px 40px;
+  min-height: calc(100vh - 80px);
+  background: #fefae0;
+}
+
+.police-title-top {
+  margin-bottom: 24px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a2e;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Police Section */
+.police-section {
+  background: #fff;
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+}
+
+.police-section-title {
+  margin-bottom: 20px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.police-section-title .count-badge {
+  background: #dc3545;
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+}
+
+/* Police Card */
+.police-card {
+  border: none;
+  padding: 20px;
+  margin-bottom: 16px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border-left: 4px solid #dc3545;
+}
+
+.police-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.police-card p {
+  margin: 8px 0;
+  font-size: 15px;
+  color: #444;
+}
+
+.police-card p strong {
+  color: #222;
+}
+
+.police-card.accepted {
+  background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
+  border-left-color: #ffc107;
+}
+
+.police-card.completed {
+  background: linear-gradient(135deg, #e8f5e9 0%, #d4edda 100%);
+  border-left-color: #28a745;
+}
+
+/* Booking Info Grid */
+.booking-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.booking-info-item {
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border-left: 3px solid #dc3545;
+}
+
+.booking-info-item label {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #666;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.booking-info-item span {
+  font-size: 15px;
+  color: #333;
+  font-weight: 500;
+}
+
+/* Map Container */
+.map-container {
+  width: 100%;
+  height: 450px;
+  border-radius: 12px;
+  margin: 20px 0;
+  border: 3px solid #e0e0e0;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Buttons */
+.btn {
+  border: none;
+  border-radius: 10px;
+  padding: 12px 24px;
+  cursor: pointer;
+  margin-right: 10px;
+  margin-top: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.btn.alert {
+  background: linear-gradient(135deg, #dc3545, #c82333);
+  color: #ffffff;
+}
+
+.btn.alert:hover {
+  background: linear-gradient(135deg, #c82333, #a71d2a);
+}
+
+.btn.view {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: #ffffff;
+}
+
+.btn.view:hover {
+  background: linear-gradient(135deg, #0056b3, #003d80);
+}
+
+/* Status Styles */
+.status-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.status {
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 13px;
+}
+
+.status.completed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status.accepted {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status.pending {
+  background: #cce5ff;
+  color: #004085;
+}
+
+/* No Bookings Message */
+.no-bookings-message {
+  text-align: center;
+  padding: 60px 40px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.no-bookings-message p {
+  font-size: 18px;
+  color: #666;
+  margin: 0;
+}
+
+/* Muted Text */
+.muted {
+  color: #888;
+  font-size: 16px;
+  text-align: center;
+  padding: 30px;
+}
+
+/* Loading State */
+.loading-state {
+  text-align: center;
+  padding: 60px;
+  color: #666;
+  font-size: 18px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e0e0e0;
+  border-top-color: #dc3545;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* === Landing Page Styles (Shared) === */
+
+.drivers-police-container {
+  padding: 50px 80px;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background-color: #fefae0;
+  min-height: 100vh;
+}
+
+/* Login Section */
+.login-section {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  margin-bottom: 100px;
+  flex-wrap: wrap;
+}
+
+.login-card {
+  flex: 1;
+  min-width: 280px;
+  max-width: 400px;
+  background: #fff;
+  padding: 40px;
+  border-radius: 18px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.login-card:hover {
+  transform: translateY(-8px);
+}
+
+.login-card h2 {
+  margin-bottom: 25px;
+  font-size: 26px;
+  color: #333;
+}
+
+.login-card button {
+  padding: 15px 30px;
+  background: #d4a373;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.login-card button:hover {
+  background: #b07d4f;
+  transform: scale(1.08);
+}
+
+/* Info Sections */
+.info-section {
+  margin: 100px 0;
+  text-align: center;
+}
+
+.info-section h2 {
+  font-size: 36px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 60px;
+  display: inline-block;
+  position: relative;
+}
+
+.info-section h2::after {
+  content: "";
+  display: block;
+  width: 70%;
+  height: 5px;
+  background: #d4a373;
+  margin: 15px auto 0;
+  border-radius: 3px;
+}
+
+/* Alternating Layout */
+.alt-layout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 60px 0;
+  gap: 50px;
+  flex-wrap: wrap;
+}
+
+.alt-layout.reverse {
+  flex-direction: row-reverse;
+}
+
+.alt-layout img {
+  flex: 1;
+  min-width: 320px;
+  max-width: 600px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+}
+
+.alt-layout img:hover {
+  transform: scale(1.05);
+}
+
+.alt-layout p {
+  flex: 1;
+  min-width: 280px;
+  font-size: 18px;
+  color: #444;
+  line-height: 1.8;
+  text-align: justify;
+}
