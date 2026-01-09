@@ -5,7 +5,6 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 // Pages & Components
 import Auth from "./pages/Auth";
-import UserHome from "./pages/UserHome";
 import HomeRouter from "./pages/HomeRouter";
 import BookAmbulance from "./pages/bookAmbulance";
 import LiveTracking from "./pages/LiveTracking";

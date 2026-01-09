@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import "../styles/driver.css";
 
 const DriverHistory = ({ showToast }) => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [addresses, setAddresses] = useState({});
-  const navigate = useNavigate();
 
   // Fetch driver's booking history
   useEffect(() => {
