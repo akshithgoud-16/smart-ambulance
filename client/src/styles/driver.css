@@ -89,6 +89,24 @@
   color: #721c24;
 }
 
+/* Profile Error Message */
+.profile-error-message {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid #f5c6cb;
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+
 /* Active Booking Card */
 .active-booking-card {
   background: #fff;

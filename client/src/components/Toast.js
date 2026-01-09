@@ -3,13 +3,15 @@ import React, { useEffect } from "react";
 import "../styles/toast.css";
 
 function Toast({ message, type = "info", onClose }) {
+  console.log("Toast component rendering with message:", message, "type:", type);
+  
   useEffect(() => {
     const timer = setTimeout(onClose, 3000); // auto close after 3s
     return () => clearTimeout(timer);
   }, [onClose]);
 
   return (
-    <div className={`toast toast-${type}`}>
+    <div className={`toast toast-${type}`} style={{ opacity: 1, visibility: 'visible' }}>
       <span>{message}</span>
       <button className="toast-close" onClick={onClose}>
         ×

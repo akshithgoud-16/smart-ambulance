@@ -29,8 +29,14 @@ function App() {
   const [toasts, setToasts] = useState([]);
 
   const showToast = useCallback((message, type = "info") => {
+    console.log("App.js showToast called with:", message, type);
     const id = Date.now() + Math.random();
-    setToasts(prev => [...prev, { id, message, type }]);
+    setToasts(prev => {
+      console.log("Previous toasts:", prev);
+      const newToasts = [...prev, { id, message, type }];
+      console.log("New toasts:", newToasts);
+      return newToasts;
+    });
   }, []);
 
   useEffect(() => {

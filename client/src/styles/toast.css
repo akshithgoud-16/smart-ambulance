@@ -1,8 +1,8 @@
 .toast-container {
   position: fixed;
-  top: 64px; /* height of your navbar */
+  top: 80px; /* height of your navbar + some spacing */
   right: 20px;
-  z-index: 1050; /* higher than navbar */
+  z-index: 9999; /* very high to be on top of everything */
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -19,8 +19,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+  animation: slideIn 0.3s ease forwards;
   pointer-events: auto; /* enable interactions for the toast itself */
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .toast-success {

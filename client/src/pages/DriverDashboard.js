@@ -7,29 +7,51 @@ const DriverDashboard = ({ showToast }) => {
   const [onDuty, setOnDuty] = useState(false);
   const [pendingBookings, setPendingBookings] = useState([]);
   const [activeBooking, setActiveBooking] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [userLocation, setUserLocation] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [driverLocation, setDriverLocation] = useState(null);
   const [addresses, setAddresses] = useState({});
+  const [driverProfile, setDriverProfile] = useState(null);
+  const [profileError, setProfileError] = useState("");
   
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const pickupMarker = useRef(null);
   const destinationMarker = useRef(null);
   const driverMarker = useRef(null);
+  // eslint-disable-next-line no-unused-vars
   const directionsRenderer = useRef(null);
   const driverToPickupRenderer = useRef(null);
   const pickupToDestRenderer = useRef(null);
   const trackingInterval = useRef(null);
   const navigate = useNavigate();
 
+  // Check if all required profile fields are filled
+  const isProfileComplete = (profile) => {
+    if (!profile) {
+      console.log("Profile is null or undefined");
+      return false;
+    }
+    const requiredFields = ['displayName', 'dob', 'area', 'pincode', 'vehicleNumber'];
+    const missingFields = requiredFields.filter(field => !profile[field] || profile[field].toString().trim() === '');
+    console.log("Profile data:", profile);
+    console.log("Missing fields:", missingFields);
+    return missingFields.length === 0;
+  };
+
   // Fetch driver profile to get current duty status
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await fetch("/api/users/profile", { credentials: "include" });
+        const res = await fetch("http://localhost:5000/api/users/profile", { credentials: "include" });
         if (res.ok) {
           const data = await res.json();
+          console.log("Fetched driver profile:", data);
+          setDriverProfile(data);
           setOnDuty(data.onDuty || false);
+        } else {
+          console.error("Failed to fetch profile, status:", res.status);
         }
       } catch (err) {
         console.error("Failed to fetch profile:", err);
@@ -291,7 +313,21 @@ const DriverDashboard = ({ showToast }) => {
   const handleDutyToggle = async () => {
     try {
       const newStatus = !onDuty;
-      const res = await fetch("/api/users/duty", {
+      
+      // Check if profile is complete before turning on duty
+      if (newStatus) {
+        if (!isProfileComplete(driverProfile)) {
+          setProfileError("Please fill all the details in your profile");
+          // Auto-clear error after 5 seconds
+          setTimeout(() => setProfileError(""), 5000);
+          return;
+        }
+      }
+      
+      // Clear any existing error
+      setProfileError("");
+      
+      const res = await fetch("http://localhost:5000/api/users/duty", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -375,6 +411,9 @@ const DriverDashboard = ({ showToast }) => {
         <span className={`duty-status-badge ${onDuty ? 'on-duty' : 'off-duty'}`}>
           {onDuty ? "On Duty" : "Off Duty"}
         </span>
+        {profileError && (
+          <span className="profile-error-message">{profileError}</span>
+        )}
       </div>
 
       {/* Active Booking View with Map */}
