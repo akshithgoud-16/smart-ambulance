@@ -9,6 +9,14 @@ const setDriverDutyStatus = async (req, res) => {
       return res.status(400).json({ message: "onDuty must be boolean" });
     }
 
+    // If trying to go on duty, check if mobile number is provided
+    if (onDuty) {
+      const user = await User.findById(req.user._id);
+      if (!user || !user.mobile || user.mobile.trim() === "") {
+        return res.status(400).json({ message: "Mobile number is required to go on duty" });
+      }
+    }
+
     const user = await User.findByIdAndUpdate(
       req.user._id,
       { onDuty },
@@ -43,7 +51,7 @@ const getUserProfile = async (req, res) => {
 const getUserBookings = async (req, res) => {
   try {
     const bookings = await Booking.find({ user: req.user._id })
-      .populate("driver", "username email phoneNumber") // added phoneNumber for completeness
+      .populate("driver", "username email mobile") // added mobile for completeness
       .sort({ timestamp: -1 }); // newest first
 
     res.json(bookings);
@@ -60,6 +68,7 @@ const updateUserProfile = async (req, res) => {
       username,
       email,
       displayName,
+      mobile,
       dob,
       station,
       area,
@@ -79,6 +88,9 @@ const updateUserProfile = async (req, res) => {
     }
     if (typeof displayName === "string") {
       updates.displayName = displayName.trim();
+    }
+    if (typeof mobile === "string") {
+      updates.mobile = mobile.trim();
     }
     if (typeof station === "string") {
       updates.station = station.trim();

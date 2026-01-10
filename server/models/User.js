@@ -27,6 +27,7 @@ const UserSchema = new mongoose.Schema({
     default: "user",
   },
   displayName: { type: String, trim: true },
+  mobile: { type: String, trim: true },
   dob: { type: Date },
   station: { type: String, trim: true },
   area: { type: String, trim: true },

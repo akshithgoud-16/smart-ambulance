@@ -33,7 +33,7 @@ const DriverDashboard = ({ showToast }) => {
       console.log("Profile is null or undefined");
       return false;
     }
-    const requiredFields = ['displayName', 'dob', 'area', 'pincode', 'vehicleNumber'];
+    const requiredFields = ['displayName', 'mobile', 'dob', 'area', 'pincode', 'vehicleNumber'];
     const missingFields = requiredFields.filter(field => !profile[field] || profile[field].toString().trim() === '');
     console.log("Profile data:", profile);
     console.log("Missing fields:", missingFields);

@@ -9,6 +9,7 @@ function DriverProfile({ showToast }) {
     dob: "",
     area: "",
     pincode: "",
+    mobile: "",
     vehicleNumber: "",
     profilePhoto: "",
   });
@@ -31,6 +32,7 @@ function DriverProfile({ showToast }) {
         dob: data.dob ? data.dob.slice(0, 10) : "",
         area: data.area || "",
         pincode: data.pincode || "",
+        mobile: data.mobile || "",
         vehicleNumber: data.vehicleNumber || "",
         profilePhoto: data.profilePhoto || "",
       });
@@ -71,6 +73,7 @@ function DriverProfile({ showToast }) {
       dob: form.dob || undefined,
       area: form.area,
       pincode: form.pincode,
+      mobile: form.mobile,
       vehicleNumber: form.vehicleNumber,
       profilePhoto: form.profilePhoto,
     };
@@ -92,6 +95,7 @@ function DriverProfile({ showToast }) {
         dob: updatedUser.dob ? updatedUser.dob.slice(0, 10) : prev.dob,
         area: updatedUser.area ?? prev.area,
         pincode: updatedUser.pincode ?? prev.pincode,
+        mobile: updatedUser.mobile ?? prev.mobile,
         vehicleNumber: updatedUser.vehicleNumber ?? prev.vehicleNumber,
         profilePhoto: updatedUser.profilePhoto ?? prev.profilePhoto,
       }));
@@ -140,6 +144,15 @@ function DriverProfile({ showToast }) {
                 value={form.displayName}
                 onChange={handleInputChange}
                 placeholder="e.g., S. Kumar"
+              />
+            </div>
+            <div className="form-row">
+              <label>Mobile Number</label>
+              <input
+                name="mobile"
+                value={form.mobile}
+                onChange={handleInputChange}
+                placeholder="e.g., 9876543210"
               />
             </div>
             <div className="form-row">
