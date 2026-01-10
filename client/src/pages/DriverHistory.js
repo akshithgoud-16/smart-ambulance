@@ -127,7 +127,7 @@ const DriverHistory = ({ showToast }) => {
                 <div className="history-info-row">
                   <div className="content">
                     <div className="label">Patient</div>
-                    <div className="value">{booking.user?.username} ({booking.user?.email})</div>
+                    <div className="value">{booking.user?.username} ({booking.user?.mobile})</div>
                   </div>
                 </div>
                 

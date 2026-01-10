@@ -16,6 +16,7 @@ import DriverHistory from "./pages/DriverHistory";
 import PoliceDashboard from "./pages/PoliceDashboard";
 import PoliceProfile from "./pages/PoliceProfile";
 import DriverProfile from "./pages/DriverProfile";
+import UserProfile from "./pages/profile";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Toast from "./components/Toast";
@@ -84,6 +85,11 @@ function App() {
         <Route path="/police/profile" element={
           <ProtectedRoute allowedRoles={["police"]}>
             <PoliceProfile showToast={showToast} />
+          </ProtectedRoute>
+        }/>
+        <Route path="/profile" element={
+          <ProtectedRoute allowedRoles={["user"]}>
+            <UserProfile showToast={showToast} />
           </ProtectedRoute>
         }/>
       </Routes>

@@ -195,7 +195,7 @@ function LiveTracking({ showToast }) {
         </div>
         <div className="tracking-badges">
           <span className={`status-chip ${status}`}>{status.toUpperCase()}</span>
-          {eta && <span className="status-chip eta">ETA {eta} min</span>}
+          {eta && <span className="status-chip eta">Estimated Arrival time {eta} min</span>}
         </div>
       </div>
 
@@ -204,16 +204,26 @@ function LiveTracking({ showToast }) {
 
         <div className="tracking-side">
           <section className="info-card">
-            <div className="info-title">Driver</div>
+            <div className="info-title">Driver Information</div>
             {driver ? (
-              <>
-                <h3>{driver.username}</h3>
-                <p className="muted">{driver.email}</p>
-              </>
+              <div className="driver-details">
+                <div className="detail-row">
+                  <span className="detail-label">Name:</span>
+                  <span className="detail-value">{driver.username}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">Mobile:</span>
+                  <span className="detail-value">{driver.mobile}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">Vehicle:</span>
+                  <span className="detail-value">{driver.vehicleNumber}</span>
+                </div>
+              </div>
             ) : (
               <p className="muted">Driver details will appear once assigned.</p>
             )}
-            {eta && <div className="pill">ETA {eta} minutes</div>}
+            {eta && <div className="pill">Estimated Arrival Time: {eta} minutes</div>}
           </section>
 
           <section className="info-card grid">

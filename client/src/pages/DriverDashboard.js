@@ -426,7 +426,7 @@ const DriverDashboard = ({ showToast }) => {
           <div className="booking-info-grid">
             <div className="booking-info-item">
               <label>Patient</label>
-              <span>{activeBooking.user?.username} ({activeBooking.user?.email})</span>
+              <span>{activeBooking.user?.username} ({activeBooking.user?.mobile})</span>
             </div>
             <div className="booking-info-item">
               <label>Pickup Location</label>
@@ -460,7 +460,7 @@ const DriverDashboard = ({ showToast }) => {
               ) : (
                 pendingBookings.map((b) => (
                   <div key={b._id} className="driver-card">
-                    <p><strong>Patient:</strong> {b.user?.username} ({b.user?.email})</p>
+                    <p><strong>Patient:</strong> {b.user?.username} ({b.user?.mobile})</p>
                     <p><strong>Pickup:</strong> {addresses[b._id] || "Loading address..."}</p>
                     <p><strong>Destination:</strong> {b.destination}</p>
                     <button onClick={() => acceptBooking(b._id)} className="btn accept">

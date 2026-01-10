@@ -9,8 +9,8 @@ const { getRoute } = require("../services/directionsService");
 const getBookingById = async (req, res) => {
   try {
     const booking = await Booking.findOne({ _id: req.params.id, user: req.user._id })
-      .populate("user", "username email")
-      .populate("driver", "username email");
+      .populate("user", "username mobile")
+      .populate("driver", "username mobile vehicleNumber");
 
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
@@ -24,7 +24,7 @@ const getBookingById = async (req, res) => {
 const getPendingBookings = async (req, res) => {
   try {
     const bookings = await Booking.find({ status: "pending" })
-      .populate("user", "username email");
+      .populate("user", "username mobile");
     res.json(bookings);
   } catch (err) {
     res.status(500).json({ message: "Server error" });
@@ -44,8 +44,8 @@ const acceptBooking = async (req, res) => {
       { status: "accepted", driver: req.user._id },
       { new: true }
     )
-      .populate("user", "username email")
-      .populate("driver", "username email");
+      .populate("user", "username mobile")
+      .populate("driver", "username mobile vehicleNumber");
 
     if (!booking)
       return res.status(404).json({ message: "Booking not found" });
@@ -102,8 +102,8 @@ const completeBooking = async (req, res) => {
       { status: "completed" },
       { new: true }
     )
-      .populate("user", "username email")
-      .populate("driver", "username email");
+      .populate("user", "username mobile")
+      .populate("driver", "username mobile vehicleNumber");
 
     if (!booking) {
       return res.status(404).json({ message: "Booking not found or not authorized" });
@@ -127,7 +127,7 @@ const completeBooking = async (req, res) => {
 const getDriverBookings = async (req, res) => {
   try {
     const bookings = await Booking.find({ driver: req.user._id })
-      .populate("user", "username email")
+      .populate("user", "username mobile")
       .sort({ timestamp: -1 });
     res.json(bookings);
   } catch (err) {

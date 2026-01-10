@@ -7,8 +7,8 @@ const getAcceptedBookings = async (req, res) => {
       status: "accepted",
       alertedPolice: req.user._id  // Only bookings where this police was alerted
     })
-      .populate("user", "username email")    // 👈 ADD field selection
-      .populate("driver", "username email")  // 👈 ADD field selection
+      .populate("user", "username mobile")    // 👈 ADD field selection
+      .populate("driver", "username mobile")  // 👈 ADD field selection
       .sort({ timestamp: -1 });              // 👈 OPTIONAL: sort by newest first
     res.json(bookings);
   } catch (err) {

@@ -77,7 +77,7 @@ const PoliceDashboard = () => {
             }}
           >
             <p>
-              <strong>User:</strong> {b.user?.username} ({b.user?.email})
+              <strong>User:</strong> {b.user?.username} ({b.user?.mobile})
             </p>
             <p>
               <strong>Driver:</strong> {b.driver?.username || "Not assigned"}

@@ -144,6 +144,12 @@ function MyBookings({ showToast }) {
                   {booking.driver && (
                     <div>
                       <strong>Assigned Driver:</strong> {booking.driver.username}
+                      {booking.status === "accepted" && (
+                        <div style={{ marginTop: "5px", fontSize: "14px", color: "#666" }}>
+                          <div><strong>Mobile:</strong> {booking.driver.mobile}</div>
+                          <div><strong>Vehicle:</strong> {booking.driver.vehicleNumber}</div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

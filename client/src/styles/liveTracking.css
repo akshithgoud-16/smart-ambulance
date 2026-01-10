@@ -168,6 +168,38 @@
   font-size: 0.92rem;
 }
 
+/* Driver Details Layout */
+.driver-details {
+  margin-top: 12px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
+  min-width: 70px;
+}
+
+.detail-value {
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: #ffffff;
+  text-align: right;
+  flex: 1;
+}
+
 /* Pills and Tags */
 .pill {
   display: inline-flex;

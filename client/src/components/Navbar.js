@@ -51,8 +51,8 @@ function Navbar({ isLoggedIn, setIsLoggedIn }) {
       { name: "Home", path: "/" },
       { name: "Book Ambulance", path: "/bookAmbulance" },
       { name: "Help", path: "/help" },
-      { name: "Contact Us", path: "/contactUs" },
       { name: "My Bookings", path: "/MyBookings" },
+      { name: "Profile", path: "/profile" },
     ],
     driver: [
       { name: "Dashboard", path: "/driver" },

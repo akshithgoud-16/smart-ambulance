@@ -29,6 +29,7 @@ const UserSchema = new mongoose.Schema({
   displayName: { type: String, trim: true },
   mobile: { type: String, trim: true },
   dob: { type: Date },
+  bloodGroup: { type: String, trim: true },
   station: { type: String, trim: true },
   area: { type: String, trim: true },
   pincode: { type: String, trim: true },

@@ -51,7 +51,7 @@ const getUserProfile = async (req, res) => {
 const getUserBookings = async (req, res) => {
   try {
     const bookings = await Booking.find({ user: req.user._id })
-      .populate("driver", "username email mobile") // added mobile for completeness
+      .populate("driver", "username mobile vehicleNumber") // added mobile and vehicleNumber for completeness
       .sort({ timestamp: -1 }); // newest first
 
     res.json(bookings);
@@ -70,6 +70,7 @@ const updateUserProfile = async (req, res) => {
       displayName,
       mobile,
       dob,
+      bloodGroup,
       station,
       area,
       pincode,
@@ -91,6 +92,9 @@ const updateUserProfile = async (req, res) => {
     }
     if (typeof mobile === "string") {
       updates.mobile = mobile.trim();
+    }
+    if (typeof bloodGroup === "string") {
+      updates.bloodGroup = bloodGroup.trim();
     }
     if (typeof station === "string") {
       updates.station = station.trim();
