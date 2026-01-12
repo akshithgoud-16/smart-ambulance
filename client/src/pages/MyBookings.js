@@ -96,7 +96,7 @@ function MyBookings({ showToast }) {
   return (
     <div className="mybookings-page">
       <h1>My Ambulance Bookings</h1>
-      <p>View and manage your emergency medical transport requests</p>
+      <p>View and manage your emergency requests</p>
       <button className="book-btn" onClick={() => navigate("/bookAmbulance")}>
         🚑 Book New Ambulance
       </button>
