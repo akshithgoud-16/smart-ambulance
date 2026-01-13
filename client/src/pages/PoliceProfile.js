@@ -323,8 +323,8 @@ function PoliceProfile({ showToast }) {
         <div className="map-card">
           <div className="map-header">
             <div>
-              <h4>Set Current Location</h4>
-              <p>Click anywhere on the map to pin your current post location.</p>
+              <h4 style={{ color: "white" }}>Set Current Location</h4>
+              <p style={{ color: "white" }}>Click anywhere on the map to pin your current post location.</p>
             </div>
             <span className="location-chip">{locationSummary}</span>
           </div>

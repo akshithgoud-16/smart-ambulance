@@ -173,7 +173,7 @@
   margin-top: 12px;
 }
 
-.detail-row {
+.driver-details .detail-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -181,23 +181,29 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.detail-row:last-child {
+.driver-details .detail-row:last-child {
   border-bottom: none;
 }
 
-.detail-label {
+.driver-details .detail-label {
   font-weight: 600;
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: #ffffff !important;
   min-width: 70px;
 }
 
-.detail-value {
+.driver-details .detail-value {
   font-weight: 500;
   font-size: 0.95rem;
-  color: #ffffff;
+  color: #ffffff !important;
   text-align: right;
   flex: 1;
+}
+
+/* Ensure all text in driver info card is white */
+.info-card .driver-details,
+.info-card .driver-details * {
+  color: #ffffff !important;
 }
 
 /* Pills and Tags */

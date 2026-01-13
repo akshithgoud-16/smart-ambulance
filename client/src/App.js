@@ -14,6 +14,7 @@ import MyBookings from "./pages/MyBookings";
 import DriverDashboard from "./pages/DriverDashboard";
 import DriverHistory from "./pages/DriverHistory";
 import PoliceDashboard from "./pages/PoliceDashboard";
+import PoliceBookingDetail from "./pages/PoliceBookingDetail";
 import PoliceProfile from "./pages/PoliceProfile";
 import DriverProfile from "./pages/DriverProfile";
 import UserProfile from "./pages/profile";
@@ -80,6 +81,11 @@ function App() {
         <Route path="/police/bookings" element={
           <ProtectedRoute allowedRoles={["police"]}>
             <PoliceDashboard showToast={showToast} />
+          </ProtectedRoute>
+        }/>
+        <Route path="/police/booking/:bookingId" element={
+          <ProtectedRoute allowedRoles={["police"]}>
+            <PoliceBookingDetail showToast={showToast} />
           </ProtectedRoute>
         }/>
         <Route path="/police/profile" element={

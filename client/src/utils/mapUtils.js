@@ -153,6 +153,17 @@ export class MapManager {
       this.destinationMarker.setMap(null);
       this.destinationMarker = null;
     }
+    if (this.driverMarker) {
+      this.driverMarker.setMap(null);
+      this.driverMarker = null;
+    }
+    // Clear directions
+    if (this.directionsRenderer) {
+      this.directionsRenderer.setDirections({ routes: [] });
+    }
+    if (this.driverDirectionsRenderer) {
+      this.driverDirectionsRenderer.setDirections({ routes: [] });
+    }
   }
 }
 

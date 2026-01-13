@@ -195,7 +195,6 @@ function LiveTracking({ showToast }) {
         </div>
         <div className="tracking-badges">
           <span className={`status-chip ${status}`}>{status.toUpperCase()}</span>
-          {eta && <span className="status-chip eta">Estimated Arrival time {eta} min</span>}
         </div>
       </div>
 

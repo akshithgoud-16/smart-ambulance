@@ -111,7 +111,14 @@ const completeBooking = async (req, res) => {
 
     const io = req.app.get("io");
     if (io) {
+      // Emit to the booking room (for users/drivers tracking this booking)
       io.to(`booking:${booking._id}`).emit("booking:completed", {
+        bookingId: booking._id.toString(),
+        status: booking.status,
+      });
+      
+      // Also broadcast globally so police dashboard can update
+      io.emit("booking:completed", {
         bookingId: booking._id.toString(),
         status: booking.status,
       });

@@ -61,7 +61,6 @@ function Navbar({ isLoggedIn, setIsLoggedIn }) {
     ],
     police: [
       { name: "Dashboard", path: "/police" },
-      { name: "Bookings", path: "/police/bookings" },
       { name: "Profile", path: "/police/profile" },
     ],
   };
