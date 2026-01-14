@@ -1,4 +1,6 @@
 // Map utilities for Google Maps operations
+import { getAmbulanceIconUrl } from "./mapIcons";
+
 export const indiaCenter = { lat: 20.5937, lng: 78.9629 };
 
 export class MapManager {
@@ -111,12 +113,12 @@ export class MapManager {
     this.driverMarker = new window.google.maps.Marker({
       position: loc,
       map: this.mapInstance,
-      title: "Driver Location",
+      title: "Ambulance",
       icon: {
-        url: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
-        scaledSize: new window.google.maps.Size(40, 40),
+        url: getAmbulanceIconUrl(),
+        scaledSize: new window.google.maps.Size(25, 25),
+        anchor: new window.google.maps.Point(12, 12),
       },
-      animation: window.google.maps.Animation.BOUNCE,
     });
 
     // Show driver route to pickup

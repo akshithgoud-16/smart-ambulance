@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { joinBookingRoom, onDriverLocation, getSocket } from "../utils/socket";
+import { getAmbulanceIconUrl, getPoliceIconUrl } from "../utils/mapIcons";
 import "../styles/police.css";
 
 const PoliceBookingDetail = ({ showToast }) => {
@@ -13,14 +14,50 @@ const PoliceBookingDetail = ({ showToast }) => {
   const [driverLocation, setDriverLocation] = useState(null);
   const [pickupAddress, setPickupAddress] = useState("");
   const [destAddress, setDestAddress] = useState("");
+  const [policeLocation, setPoliceLocation] = useState(null);
+  const [mapReady, setMapReady] = useState(false);
 
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const pickupMarker = useRef(null);
   const destinationMarker = useRef(null);
   const driverMarker = useRef(null);
+  const policeMarker = useRef(null);
   const driverToPickupRenderer = useRef(null);
   const pickupToDestRenderer = useRef(null);
+
+  // Fetch police user's profile to get their current location
+  useEffect(() => {
+    const fetchPoliceProfile = async () => {
+      try {
+        console.log("🚔 Fetching police profile for current location...");
+        const res = await fetch("http://localhost:5000/api/users/profile", {
+          credentials: "include",
+        });
+        if (res.ok) {
+          const data = await res.json();
+          console.log("🚔 Police profile data:", data);
+          console.log("🚔 Current location in profile:", data.currentLocation);
+          if (data.currentLocation && data.currentLocation.lat && data.currentLocation.lng) {
+            setPoliceLocation({
+              lat: data.currentLocation.lat,
+              lng: data.currentLocation.lng,
+              name: data.displayName || "Your Location",
+              station: data.station || "Police Station"
+            });
+            console.log("🚔 Police location set successfully");
+          } else {
+            console.log("🚔 No valid currentLocation in police profile");
+          }
+        } else {
+          console.log("🚔 Failed to fetch police profile, status:", res.status);
+        }
+      } catch (err) {
+        console.error("Failed to fetch police profile:", err);
+      }
+    };
+    fetchPoliceProfile();
+  }, []);
 
   // Fetch booking details
   useEffect(() => {
@@ -175,14 +212,70 @@ const PoliceBookingDetail = ({ showToast }) => {
     bounds.extend({ lat: booking.pickupLat, lng: booking.pickupLng });
     bounds.extend({ lat: booking.destLat, lng: booking.destLng });
     mapInstance.current.fitBounds(bounds);
+    
+    // Signal that map is ready
+    setMapReady(true);
 
     return () => {
       // Cleanup
       if (pickupMarker.current) pickupMarker.current.setMap(null);
       if (destinationMarker.current) destinationMarker.current.setMap(null);
       if (driverMarker.current) driverMarker.current.setMap(null);
+      if (policeMarker.current) policeMarker.current.setMap(null);
+      setMapReady(false);
     };
   }, [booking]);
+
+  // Add police location marker when policeLocation is available and map is ready
+  useEffect(() => {
+    console.log("🚔 Police marker effect triggered");
+    console.log("🚔 policeLocation:", policeLocation);
+    console.log("🚔 mapReady:", mapReady);
+    console.log("🚔 mapInstance.current:", mapInstance.current);
+    console.log("🚔 window.google:", !!window.google);
+    
+    if (!policeLocation || !mapReady || !mapInstance.current || !window.google) {
+      console.log("🚔 Skipping - missing dependencies");
+      return;
+    }
+
+    console.log("🚔 Adding police marker at:", policeLocation.lat, policeLocation.lng);
+
+    // Remove existing police marker if any
+    if (policeMarker.current) policeMarker.current.setMap(null);
+
+    // Add police marker (purple)
+    policeMarker.current = new window.google.maps.Marker({
+      position: { lat: policeLocation.lat, lng: policeLocation.lng },
+      map: mapInstance.current,
+      title: `${policeLocation.name} - ${policeLocation.station}`,
+      icon: {
+        url: getPoliceIconUrl(),
+        scaledSize: new window.google.maps.Size(25, 25),
+        anchor: new window.google.maps.Point(12, 12),
+      },
+      zIndex: 900,
+    });
+    
+    console.log("🚔 Police marker created successfully");
+
+    // Add info window for police marker
+    const infoWindow = new window.google.maps.InfoWindow({
+      content: `<div style="font-weight:bold;">🚔 ${policeLocation.name}</div><div>${policeLocation.station}</div><div style="color:#666;font-size:12px;">Your Location</div>`,
+    });
+    policeMarker.current.addListener("click", () => {
+      infoWindow.open(mapInstance.current, policeMarker.current);
+    });
+
+    // Extend bounds to include police location
+    if (booking) {
+      const bounds = new window.google.maps.LatLngBounds();
+      bounds.extend({ lat: booking.pickupLat, lng: booking.pickupLng });
+      bounds.extend({ lat: booking.destLat, lng: booking.destLng });
+      bounds.extend({ lat: policeLocation.lat, lng: policeLocation.lng });
+      mapInstance.current.fitBounds(bounds);
+    }
+  }, [policeLocation, booking, mapReady]);
 
   // Socket connection for real-time driver tracking
   useEffect(() => {
@@ -206,8 +299,9 @@ const PoliceBookingDetail = ({ showToast }) => {
             map: mapInstance.current,
             title: "Ambulance",
             icon: {
-              url: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
-              scaledSize: new window.google.maps.Size(45, 45),
+              url: getAmbulanceIconUrl(),
+              scaledSize: new window.google.maps.Size(25, 25),
+              anchor: new window.google.maps.Point(12, 12),
             },
             zIndex: 1000,
           });
@@ -311,6 +405,7 @@ const PoliceBookingDetail = ({ showToast }) => {
               <span className="legend-item"><span className="dot red"></span> Pickup</span>
               <span className="legend-item"><span className="dot green"></span> Hospital</span>
               <span className="legend-item"><span className="dot blue"></span> Ambulance</span>
+              <span className="legend-item"><span className="dot purple"></span> Your Location</span>
               <span className="legend-item"><span className="route-line orange"></span> Driver → Pickup</span>
               <span className="legend-item"><span className="route-line blue"></span> Pickup → Hospital</span>
             </div>

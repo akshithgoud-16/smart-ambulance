@@ -1007,6 +1007,7 @@
 .map-legend-inline .dot.red { background: #ea4335; }
 .map-legend-inline .dot.green { background: #34a853; }
 .map-legend-inline .dot.blue { background: #4285f4; }
+.map-legend-inline .dot.purple { background: #9b59b6; }
 
 .map-legend-inline .route-line {
   width: 20px;

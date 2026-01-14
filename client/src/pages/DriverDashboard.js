@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { joinBookingRoom, emitDriverLocation, onUserLocation } from "../utils/socket";
+import { getAmbulanceIconUrl, getPoliceIconUrl } from "../utils/mapIcons";
 import "../styles/driver.css";
 
 const DriverDashboard = ({ showToast }) => {
@@ -15,11 +16,14 @@ const DriverDashboard = ({ showToast }) => {
   const [driverProfile, setDriverProfile] = useState(null);
   const [profileError, setProfileError] = useState("");
   
+  const [policeLocations, setPoliceLocations] = useState([]);
+  
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const pickupMarker = useRef(null);
   const destinationMarker = useRef(null);
   const driverMarker = useRef(null);
+  const policeMarkers = useRef([]);
   // eslint-disable-next-line no-unused-vars
   const directionsRenderer = useRef(null);
   const driverToPickupRenderer = useRef(null);
@@ -127,6 +131,64 @@ const DriverDashboard = ({ showToast }) => {
         scaledSize: new window.google.maps.Size(40, 40),
       },
     });
+
+    // Fetch and display police locations
+    const fetchPoliceLocations = async () => {
+      try {
+        console.log("🚔 Fetching police locations for booking:", activeBooking._id);
+        const res = await fetch(`/api/bookings/${activeBooking._id}/police-locations`, {
+          credentials: "include"
+        });
+        console.log("🚔 Police locations response status:", res.status);
+        if (res.ok) {
+          const locations = await res.json();
+          console.log("🚔 Police locations received:", locations);
+          setPoliceLocations(locations);
+          
+          // Clear existing police markers
+          policeMarkers.current.forEach(marker => marker.setMap(null));
+          policeMarkers.current = [];
+          
+          // Add police markers
+          if (locations.length === 0) {
+            console.log("🚔 No police locations to display");
+          }
+          locations.forEach(police => {
+            console.log("🚔 Adding police marker at:", police.lat, police.lng);
+            
+            const marker = new window.google.maps.Marker({
+              position: { lat: police.lat, lng: police.lng },
+              map: mapInstance.current,
+              title: `${police.name} - ${police.station}`,
+              icon: {
+                url: getPoliceIconUrl(),
+                scaledSize: new window.google.maps.Size(25, 25),
+                anchor: new window.google.maps.Point(12, 12),
+              },
+              zIndex: 900,
+            });
+            
+            // Add info window for police marker
+            const infoWindow = new window.google.maps.InfoWindow({
+              content: `<div style="font-weight:bold;">🚔 ${police.name}</div><div>${police.station}</div>`,
+            });
+            marker.addListener("click", () => {
+              infoWindow.open(mapInstance.current, marker);
+            });
+            
+            policeMarkers.current.push(marker);
+            console.log("🚔 Police marker added successfully");
+          });
+        } else {
+          const errorData = await res.json();
+          console.error("🚔 Failed to fetch police locations:", errorData);
+        }
+      } catch (err) {
+        console.error("Error fetching police locations:", err);
+      }
+    };
+    
+    fetchPoliceLocations();
 
     // Initialize direction renderers
     const directionsService = new window.google.maps.DirectionsService();
@@ -263,6 +325,9 @@ const DriverDashboard = ({ showToast }) => {
 
     return () => {
       if (trackingInterval.current) clearInterval(trackingInterval.current);
+      // Clear police markers on cleanup
+      policeMarkers.current.forEach(marker => marker.setMap(null));
+      policeMarkers.current = [];
     };
   }, [activeBooking]);
 
@@ -274,12 +339,12 @@ const DriverDashboard = ({ showToast }) => {
     driverMarker.current = new window.google.maps.Marker({
       position: loc,
       map: mapInstance.current,
-      title: "Your Location",
+      title: "Your Location (Ambulance)",
       icon: {
-        url: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
-        scaledSize: new window.google.maps.Size(40, 40),
+        url: getAmbulanceIconUrl(),
+        scaledSize: new window.google.maps.Size(50, 50),
+        anchor: new window.google.maps.Point(25, 25),
       },
-      animation: window.google.maps.Animation.BOUNCE,
     });
   };
 
@@ -389,6 +454,9 @@ const DriverDashboard = ({ showToast }) => {
       if (pickupMarker.current) pickupMarker.current.setMap(null);
       if (destinationMarker.current) destinationMarker.current.setMap(null);
       if (driverMarker.current) driverMarker.current.setMap(null);
+      // Clear police markers
+      policeMarkers.current.forEach(marker => marker.setMap(null));
+      policeMarkers.current = [];
       
       // Navigate to history
       navigate("/driver/history");
@@ -423,29 +491,74 @@ const DriverDashboard = ({ showToast }) => {
             <h3>Active Booking</h3>
           </div>
           
-          <div className="booking-info-grid">
-            <div className="booking-info-item">
-              <label>Patient</label>
-              <span>{activeBooking.user?.username} ({activeBooking.user?.mobile})</span>
+          <div className="active-booking-content">
+            {/* Left Side: Map */}
+            <div className="map-section">
+              <div className="map-header">
+                <h2>Live Location Tracking</h2>
+                <div className="map-legend-inline">
+                  <span className="legend-item"><span className="dot red"></span> Pickup</span>
+                  <span className="legend-item"><span className="dot green"></span> Hospital</span>
+                  <span className="legend-item"><span className="dot blue"></span> Ambulance</span>
+                  <span className="legend-item"><span className="dot purple"></span> Police</span>
+                </div>
+              </div>
+              <div ref={mapRef} className="map-container"></div>
             </div>
-            <div className="booking-info-item">
-              <label>Pickup Location</label>
-              <span>{addresses[activeBooking._id] || "Loading address..."}</span>
-            </div>
-            <div className="booking-info-item">
-              <label>Destination</label>
-              <span>{activeBooking.destination}</span>
+
+            {/* Right Side: Details */}
+            <div className="info-section">
+              {/* Patient Info */}
+              <div className="info-card">
+                <div className="card-header">
+                  <h3>Patient Information</h3>
+                </div>
+                <div className="card-content">
+                  <div className="info-row">
+                    <span className="label">Name</span>
+                    <span className="value">{activeBooking.user?.username || "Unknown"}</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="label">Mobile</span>
+                    <a href={`tel:${activeBooking.user?.mobile}`} className="value phone">
+                      📞 {activeBooking.user?.mobile || "N/A"}
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              {/* Location Info */}
+              <div className="info-card locations">
+                <div className="card-header">
+                  <h3>Route Details</h3>
+                </div>
+                <div className="card-content">
+                  <div className="location-item pickup">
+                    <div className="location-marker-circle red">P</div>
+                    <div className="location-text">
+                      <span className="location-label">Pickup Location</span>
+                      <span className="location-addr">{addresses[activeBooking._id] || "Loading address..."}</span>
+                    </div>
+                  </div>
+                  <div className="route-arrow">
+                    <span>↓</span>
+                  </div>
+                  <div className="location-item destination">
+                    <div className="location-marker-circle green">D</div>
+                    <div className="location-text">
+                      <span className="location-label">Hospital / Destination</span>
+                      <span className="location-addr">{activeBooking.destination}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Complete Button */}
+              <button onClick={completeBooking} className="btn complete">
+                Mark as Completed
+              </button>
             </div>
           </div>
-          
-          
-
-          {/* Google Map */}
-          <div ref={mapRef} className="map-container"></div>
-
-          <button onClick={completeBooking} className="btn complete">
-            Mark as Completed
-          </button>
         </div>
       ) : (
         <>
