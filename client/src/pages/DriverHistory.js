@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "../styles/driver.css";
+import "../styles/DriverHistory.css";
 
 const DriverHistory = ({ showToast }) => {
   const [bookings, setBookings] = useState([]);

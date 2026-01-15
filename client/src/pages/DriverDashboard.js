@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { joinBookingRoom, emitDriverLocation, onUserLocation } from "../utils/socket";
 import { getAmbulanceIconUrl, getPoliceIconUrl } from "../utils/mapIcons";
-import "../styles/driver.css";
+import "../styles/DriverDashboard.css";
 
 const DriverDashboard = ({ showToast }) => {
   const [onDuty, setOnDuty] = useState(false);
@@ -342,8 +342,8 @@ const DriverDashboard = ({ showToast }) => {
       title: "Your Location (Ambulance)",
       icon: {
         url: getAmbulanceIconUrl(),
-        scaledSize: new window.google.maps.Size(50, 50),
-        anchor: new window.google.maps.Point(25, 25),
+        scaledSize: new window.google.maps.Size(25, 25),
+        anchor: new window.google.maps.Point(12, 12),
       },
     });
   };
@@ -487,9 +487,6 @@ const DriverDashboard = ({ showToast }) => {
       {/* Active Booking View with Map */}
       {activeBooking ? (
         <div className="active-booking-card">
-          <div className="active-booking-header">
-            <h3>Active Booking</h3>
-          </div>
           
           <div className="active-booking-content">
             {/* Left Side: Map */}
@@ -499,8 +496,8 @@ const DriverDashboard = ({ showToast }) => {
                 <div className="map-legend-inline">
                   <span className="legend-item"><span className="dot red"></span> Pickup</span>
                   <span className="legend-item"><span className="dot green"></span> Hospital</span>
-                  <span className="legend-item"><span className="dot blue"></span> Ambulance</span>
-                  <span className="legend-item"><span className="dot purple"></span> Police</span>
+                  <span className="legend-item"><span className="route-line orange"></span> Driver → Pickup</span>
+                  <span className="legend-item"><span className="route-line blue"></span> Pickup → Hospital</span>
                 </div>
               </div>
               <div ref={mapRef} className="map-container"></div>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import "../styles/policeProfile.css";
+import "../styles/DriverProfile.css";
 
 const placeholderAvatar = "https://via.placeholder.com/160x160.png?text=Driver";
 

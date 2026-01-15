@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import "../styles/policeProfile.css";
+import "../styles/PoliceProfile.css";
 
 function UserProfile({ showToast }) {
   const [form, setForm] = useState({

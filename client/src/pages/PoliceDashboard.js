@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { getSocket } from "../utils/socket";
-import "../styles/police.css";
+import "../styles/PoliceDashboard.css";
 
 const PoliceDashboard = ({ showToast }) => {
   const [bookings, setBookings] = useState([]);

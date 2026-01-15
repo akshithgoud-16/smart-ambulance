@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { joinBookingRoom, onDriverLocation, getSocket } from "../utils/socket";
 import { getAmbulanceIconUrl, getPoliceIconUrl } from "../utils/mapIcons";
-import "../styles/police.css";
+import "../styles/PoliceBookingDetail.css";
 
 const PoliceBookingDetail = ({ showToast }) => {
   const { bookingId } = useParams();
@@ -404,8 +404,6 @@ const PoliceBookingDetail = ({ showToast }) => {
             <div className="map-legend-inline">
               <span className="legend-item"><span className="dot red"></span> Pickup</span>
               <span className="legend-item"><span className="dot green"></span> Hospital</span>
-              <span className="legend-item"><span className="dot blue"></span> Ambulance</span>
-              <span className="legend-item"><span className="dot purple"></span> Your Location</span>
               <span className="legend-item"><span className="route-line orange"></span> Driver → Pickup</span>
               <span className="legend-item"><span className="route-line blue"></span> Pickup → Hospital</span>
             </div>

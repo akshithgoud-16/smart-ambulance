@@ -199,7 +199,18 @@ function LiveTracking({ showToast }) {
       </div>
 
       <div className="tracking-body">
-        <div className="tracking-map" ref={mapRef} />
+        <div className="map-section">
+          <div className="map-header">
+            <h2>Live Location Tracking</h2>
+            <div className="map-legend-inline">
+              <span className="legend-item"><span className="dot red"></span> Pickup</span>
+              <span className="legend-item"><span className="dot green"></span> Destination</span>
+              <span className="legend-item"><span className="route-line orange"></span> Driver → Pickup</span>
+              <span className="legend-item"><span className="route-line blue"></span> Pickup → Hospital</span>
+            </div>
+          </div>
+          <div className="tracking-map" ref={mapRef} />
+        </div>
 
         <div className="tracking-side">
           <section className="info-card">

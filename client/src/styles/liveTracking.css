@@ -95,14 +95,66 @@
   gap: 20px;
 }
 
-/* Map Container */
-.tracking-map {
-  width: 100%;
-  min-height: 540px;
+/* Map Section with Header */
+.map-section {
   background: #ffffff;
   border-radius: 16px;
   border: 2px solid #cad2c5;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.map-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #354f52, #52796f);
+  color: #fff;
+}
+
+.map-header h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+}
+
+.map-legend-inline {
+  display: flex;
+  gap: 14px;
+  font-size: 12px;
+}
+
+.map-legend-inline .legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 5px 10px;
+  border-radius: 12px;
+}
+
+.map-legend-inline .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+}
+
+.map-legend-inline .dot.red { background: #ea4335; }
+.map-legend-inline .dot.green { background: #34a853; }
+.map-legend-inline .dot.blue { background: #4285f4; }
+
+/* Map Container */
+.tracking-map {
+  width: 100%;
+  flex: 1;
+  min-height: 500px;
+  background: #f0f4f0;
   overflow: hidden;
 }
 
@@ -316,6 +368,10 @@
   .tracking-map {
     min-height: 400px;
   }
+  
+  .map-section {
+    order: -1;
+  }
 }
 
 @media (max-width: 640px) {
@@ -333,6 +389,19 @@
 
   .tracking-map {
     min-height: 340px;
+  }
+  
+  .map-header {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+    padding: 14px;
+  }
+  
+  .map-legend-inline {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
   }
 
   .actions {
