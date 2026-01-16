@@ -17,6 +17,19 @@ router.post("/", isAuthenticated, async (req, res) => {
   try {
     const { pickup, destination, pickupLat, pickupLng, destLat, destLng } = req.body;
 
+    // Check if user already has a pending booking
+    const existingPendingBooking = await Booking.findOne({
+      user: req.user._id,
+      status: "pending"
+    });
+
+    if (existingPendingBooking) {
+      return res.status(400).json({ 
+        message: "You already have a pending booking. Please wait for a driver to accept it.",
+        existingBooking: existingPendingBooking
+      });
+    }
+
     const booking = new Booking({
       user: req.user._id,
       pickup,
@@ -40,6 +53,24 @@ router.get("/", isAuthenticated, async (req, res) => {
   try {
     const bookings = await Booking.find({ user: req.user._id }).sort({ timestamp: -1 });
     res.json(bookings);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// GET /api/bookings/pending-check → check if user has a pending booking
+router.get("/pending-check", isAuthenticated, async (req, res) => {
+  try {
+    const pendingBooking = await Booking.findOne({
+      user: req.user._id,
+      status: "pending"
+    });
+    
+    res.json({ 
+      hasPendingBooking: !!pendingBooking,
+      booking: pendingBooking 
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });

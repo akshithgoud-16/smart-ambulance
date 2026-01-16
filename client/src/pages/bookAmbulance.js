@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { MapManager, initializeAutocomplete } from "../utils/mapUtils";
 import { useLocation } from "../hooks/useLocation";
 import { useBookingSocket } from "../hooks/useBookingSocket";
-import { createBooking, getBookingById } from "../services/bookingService";
+import { createBooking, getBookingById, checkPendingBooking } from "../services/bookingService";
 import { calculateETA } from "../services/locationService";
 import { SearchingOverlay, DriverPanel } from "../components/BookingStatus";
 import "../styles/bookAmbulance.css";
@@ -118,6 +118,25 @@ function BookAmbulance({ showToast }) {
       }, 100);
     }
   }, [locationMode]);
+
+  // Check for existing pending booking on page load
+  useEffect(() => {
+    const checkExistingBooking = async () => {
+      try {
+        const { hasPendingBooking, booking } = await checkPendingBooking();
+        if (hasPendingBooking && booking) {
+          // Restore searching state for existing pending booking
+          setCurrentBooking(booking);
+          setBookingStatus("searching");
+          showToast("🔍 You have an existing booking request. Searching for ambulance...", "info");
+        }
+      } catch (err) {
+        console.error("Error checking pending booking:", err);
+      }
+    };
+    
+    checkExistingBooking();
+  }, [showToast]);
 
   // Track searching time while in 'searching' state
   useEffect(() => {

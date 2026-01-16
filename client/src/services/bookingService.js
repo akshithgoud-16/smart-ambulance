@@ -30,3 +30,15 @@ export const getBookingById = async (bookingId) => {
 
   return await res.json();
 };
+
+export const checkPendingBooking = async () => {
+  const res = await fetch("/api/bookings/pending-check", {
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    return { hasPendingBooking: false, booking: null };
+  }
+
+  return await res.json();
+};
