@@ -670,3 +670,102 @@
     gap: 6px;
   }
 }
+
+/* Driver Tracking Page Styles */
+.tracking-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.tracking-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0;
+  flex: 1;
+}
+
+.btn-back {
+  background: linear-gradient(135deg, #6c757d, #545b62);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
+}
+
+.status-badge {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 60px;
+  color: #666;
+  font-size: 18px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e0e0e0;
+  border-top-color: #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.no-booking-message {
+  text-align: center;
+  padding: 60px 40px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.no-booking-message h3 {
+  font-size: 22px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.action-buttons {
+  margin-top: 20px;
+}
+
+.btn-complete {
+  width: 100%;
+  background: linear-gradient(135deg, #28a745, #218838);
+  color: #fff;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-complete:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+}

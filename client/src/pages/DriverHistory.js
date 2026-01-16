@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/DriverHistory.css";
 
 const DriverHistory = ({ showToast }) => {
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [addresses, setAddresses] = useState({});
@@ -148,6 +150,14 @@ const DriverHistory = ({ showToast }) => {
 
               <div className="history-card-footer">
                 <small>{new Date(booking.timestamp).toLocaleString()}</small>
+                {booking.status !== "completed" && (
+                  <button
+                    className="track-route-btn"
+                    onClick={() => navigate(`/driver/track/${booking._id}`, { state: { booking } })}
+                  >
+                    Track Route
+                  </button>
+                )}
               </div>
             </div>
           ))}

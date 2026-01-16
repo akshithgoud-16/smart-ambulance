@@ -13,6 +13,7 @@ import ContactUs from "./pages/contactUs";
 import MyBookings from "./pages/MyBookings";
 import DriverDashboard from "./pages/DriverDashboard";
 import DriverHistory from "./pages/DriverHistory";
+import DriverTracking from "./pages/DriverTracking";
 import PoliceDashboard from "./pages/PoliceDashboard";
 import PoliceBookingDetail from "./pages/PoliceBookingDetail";
 import PoliceProfile from "./pages/PoliceProfile";
@@ -66,6 +67,11 @@ function App() {
         <Route path="/driver/history" element={
           <ProtectedRoute allowedRoles={["driver"]}>
             <DriverHistory showToast={showToast} />
+          </ProtectedRoute>
+        }/>
+        <Route path="/driver/track/:bookingId" element={
+          <ProtectedRoute allowedRoles={["driver"]}>
+            <DriverTracking showToast={showToast} />
           </ProtectedRoute>
         }/>
         <Route path="/driver/profile" element={
