@@ -1,5 +1,6 @@
 const Booking = require("../models/Booking");
 const User = require("../models/User");
+const { distanceInMeters } = require("../utils/geoUtils");
 
 // 🔽 ADDED IMPORTS (ONLY THESE)
 const { notifyPoliceIfRoutePasses } = require("../services/policeAlertService");
@@ -23,9 +24,39 @@ const getBookingById = async (req, res) => {
 // Get all pending bookings (for drivers)
 const getPendingBookings = async (req, res) => {
   try {
+    const driver = await User.findById(req.user._id).select("currentLocation");
+
+    // Require a valid location to filter nearby requests
+    const driverLat = driver?.currentLocation?.lat;
+    const driverLng = driver?.currentLocation?.lng;
+
+    if (typeof driverLat !== "number" || typeof driverLng !== "number") {
+      console.warn(`Pending bookings fetch skipped — missing driver location for ${req.user._id}`);
+      return res.json([]);
+    }
+
+    const RADIUS_KM = 15;
+
     const bookings = await Booking.find({ status: "pending" })
-      .populate("user", "username mobile");
-    res.json(bookings);
+      .populate("user", "username mobile")
+      .lean();
+
+    const nearbyBookings = bookings.filter((booking) => {
+      if (typeof booking.pickupLat !== "number" || typeof booking.pickupLng !== "number") {
+        return false;
+      }
+
+      const distanceKm = distanceInMeters(
+        driverLat,
+        driverLng,
+        booking.pickupLat,
+        booking.pickupLng
+      ) / 1000;
+
+      return distanceKm <= RADIUS_KM;
+    });
+
+    res.json(nearbyBookings);
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }

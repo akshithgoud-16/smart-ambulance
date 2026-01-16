@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { indiaCenter } from "../utils/mapUtils";
-import "../styles/PoliceProfile.css";
+import "../styles/policeProfile.css";
 
 const placeholderAvatar = "https://via.placeholder.com/160x160.png?text=Police";
 

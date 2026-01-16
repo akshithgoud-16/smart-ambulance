@@ -16,8 +16,6 @@ const DriverDashboard = ({ showToast }) => {
   const [driverProfile, setDriverProfile] = useState(null);
   const [profileError, setProfileError] = useState("");
   
-  const [policeLocations, setPoliceLocations] = useState([]);
-  
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const pickupMarker = useRef(null);
@@ -143,7 +141,6 @@ const DriverDashboard = ({ showToast }) => {
         if (res.ok) {
           const locations = await res.json();
           console.log("🚔 Police locations received:", locations);
-          setPoliceLocations(locations);
           
           // Clear existing police markers
           policeMarkers.current.forEach(marker => marker.setMap(null));
@@ -466,6 +463,44 @@ const DriverDashboard = ({ showToast }) => {
     }
   };
 
+  const handleFetchLocation = async () => {
+    if (!navigator.geolocation) {
+      showToast("Geolocation is not supported", "error");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        
+        try {
+          const res = await fetch("/api/users/driver/location", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ lat: latitude, lng: longitude }),
+          });
+
+          if (res.ok) {
+            setDriverLocation({ lat: latitude, lng: longitude });
+            showToast(`📍 Location saved: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`, "success");
+          } else {
+            const data = await res.json();
+            showToast(data.message || "Failed to save location", "error");
+          }
+        } catch (err) {
+          console.error("Error saving location:", err);
+          showToast("Failed to save location", "error");
+        }
+      },
+      (error) => {
+        console.error("Geolocation error:", error);
+        showToast("Failed to get your location. Please enable location services.", "error");
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
+
   return (
     <div className="driver-dashboard">
       <h2 className="driver-title-top">Driver Dashboard</h2>
@@ -479,6 +514,9 @@ const DriverDashboard = ({ showToast }) => {
         <span className={`duty-status-badge ${onDuty ? 'on-duty' : 'off-duty'}`}>
           {onDuty ? "On Duty" : "Off Duty"}
         </span>
+        <button onClick={handleFetchLocation} className="btn fetch-location">
+          📍 Fetch Location
+        </button>
         {profileError && (
           <span className="profile-error-message">{profileError}</span>
         )}
