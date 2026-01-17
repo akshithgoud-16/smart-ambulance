@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { MapManager, initializeAutocomplete } from "../utils/mapUtils";
 import { useLocation } from "../hooks/useLocation";
 import { useBookingSocket } from "../hooks/useBookingSocket";
-import { createBooking, getBookingById, checkPendingBooking } from "../services/bookingService";
+import { createBooking, getBookingById, checkPendingBooking, cancelBooking } from "../services/bookingService";
 import { calculateETA } from "../services/locationService";
 import { SearchingOverlay, DriverPanel } from "../components/BookingStatus";
 import "../styles/bookAmbulance.css";
@@ -19,6 +19,7 @@ function BookAmbulance({ showToast }) {
   const [driverLocation, setDriverLocation] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
   const [isTracking, setIsTracking] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
   
   // Search timeout constant (90 seconds)
   const SEARCH_TIMEOUT_SECONDS = 90;
@@ -311,6 +312,31 @@ useEffect(() => {
     }
   };
 
+  // Handle cancel booking
+  const handleCancelBooking = async () => {
+    if (!currentBooking?._id) {
+      showToast("❌ No active booking to cancel", "error");
+      return;
+    }
+
+    setIsCancelling(true);
+    try {
+      await cancelBooking(currentBooking._id);
+      showToast("✅ Booking cancelled successfully", "success");
+      setBookingStatus(null);
+      setCurrentBooking(null);
+      setSearchingTime(0);
+      setDriver(null);
+      setIsTracking(false);
+      stopUserLocationSharing();
+    } catch (err) {
+      console.error("Cancel booking error:", err);
+      showToast("❌ " + err.message, "error");
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
   return (
     <div className="ambulance-page">
       <div className="map-side">
@@ -375,6 +401,8 @@ useEffect(() => {
         <SearchingOverlay 
           searchingTime={searchingTime} 
           maxSearchTime={SEARCH_TIMEOUT_SECONDS}
+          onCancel={handleCancelBooking}
+          isCancelling={isCancelling}
         />
       )}
 
@@ -398,6 +426,8 @@ useEffect(() => {
           driverLocation={driverLocation}
           userLocation={userLocation}
           isTracking={isTracking}
+          onCancel={handleCancelBooking}
+          isCancelling={isCancelling}
         />
       )}
     </div>

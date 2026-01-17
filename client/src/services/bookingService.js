@@ -42,3 +42,17 @@ export const checkPendingBooking = async () => {
 
   return await res.json();
 };
+
+export const cancelBooking = async (bookingId) => {
+  const res = await fetch(`/api/bookings/${bookingId}/cancel`, {
+    method: "PUT",
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    const errData = await res.json();
+    throw new Error(errData.message || "Failed to cancel booking");
+  }
+
+  return await res.json();
+};

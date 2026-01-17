@@ -125,7 +125,7 @@
   padding: 16px;
   border: none;
   border-radius: 12px;
-  background-color: #006d77;
+  background-color: #006d77 !important;
   color: white;
   font-size: 1.1rem;
   font-weight: bold;
@@ -212,6 +212,31 @@
   font-weight: bold;
 }
 
+/* Cancel Search Button */
+.cancel-search-btn {
+  margin-top: 20px;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 8px;
+  background-color: #dc3545;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancel-search-btn:hover:not(:disabled) {
+  background-color: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.cancel-search-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -263,6 +288,31 @@
   margin: 0;
   font-size: 14px;
   font-weight: bold;
+}
+
+/* Cancel Booking Button in Driver Panel */
+.cancel-booking-btn {
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background-color: #dc3545;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancel-booking-btn:hover:not(:disabled) {
+  background-color: #c82333;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.cancel-booking-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
 }
 
 .driver-tracking-text {

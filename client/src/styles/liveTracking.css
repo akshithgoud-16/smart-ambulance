@@ -34,7 +34,7 @@
 
 .tracking-header h2 {
   margin: 0;
-  color: #354f52;
+  color: #2e4d51;
   font-weight: 800;
   font-size: 1.8rem;
   letter-spacing: -0.4px;
@@ -42,7 +42,7 @@
 
 .tracking-sub {
   margin: 6px 0 0 0;
-  color: #52796f;
+  color: #07710e;
   font-size: 0.95rem;
 }
 
@@ -59,20 +59,20 @@
   font-weight: 700;
   font-size: 0.85rem;
   background: #f0f4f0;
-  color: #354f52;
+  color: #10ac0a;
   border: 1px solid #cad2c5;
   letter-spacing: 0.3px;
 }
 
 .status-chip.accepted {
-  background: #d8f3dc;
-  color: #2d6a4f;
+  background: #049006;
+  color: #354f52;
   border-color: #95d5b2;
 }
 
 .status-chip.completed {
-  background: #e8eaed;
-  color: #354f52;
+  background: #049006;
+  color: #ffffff;
   border-color: #b8bfc4;
 }
 
@@ -344,6 +344,25 @@
 .actions button.primary:hover {
   background: #3f5c52;
   border-color: #3f5c52;
+}
+
+.actions button.cancel-btn {
+  background: #dc3545;
+  color: #ffffff;
+  border-color: #dc3545;
+}
+
+.actions button.cancel-btn:hover {
+  background: #c82333;
+  border-color: #c82333;
+}
+
+.actions button.cancel-btn:disabled {
+  background: #e57373;
+  border-color: #e57373;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 /* Empty State */

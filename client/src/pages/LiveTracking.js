@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { MapManager } from "../utils/mapUtils";
 import { calculateETA } from "../services/locationService";
-import { getBookingById } from "../services/bookingService";
+import { getBookingById, cancelBooking } from "../services/bookingService";
 import { joinBookingRoom, emitUserLocation, getSocket } from "../utils/socket";
 import "../styles/liveTracking.css";
 
@@ -32,6 +32,7 @@ function LiveTracking({ showToast }) {
   const [status, setStatus] = useState(initialBooking?.status || "accepted");
   const [eta, setEta] = useState(null);
   const [loading, setLoading] = useState(!initialBooking);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   const mapRef = useRef(null);
   const mapManagerRef = useRef(null);
@@ -85,6 +86,23 @@ function LiveTracking({ showToast }) {
       locationIntervalRef.current = null;
     }
   }, []);
+
+  // Handle cancel booking
+  const handleCancelBooking = async () => {
+    if (!bookingId) return;
+
+    setIsCancelling(true);
+    try {
+      await cancelBooking(bookingId);
+      showToast("✅ Booking cancelled successfully", "success");
+      stopSharingLocation();
+      navigate("/");
+    } catch (err) {
+      console.error("Cancel booking error:", err);
+      showToast("❌ " + err.message, "error");
+      setIsCancelling(false);
+    }
+  };
 
   const shareUserLocation = useCallback(() => {
     if (!bookingId) return;
@@ -152,12 +170,22 @@ function LiveTracking({ showToast }) {
       showToast("Ride completed. Hope you are safe!", "success");
     };
 
+    const handleCancelled = (payload) => {
+      const payloadId = payload?.bookingId || payload?._id;
+      if (payloadId && String(payloadId) !== String(bookingId)) return;
+
+      setStatus("cancelled");
+      stopSharingLocation();
+    };
+
     socket.on("driver:location", handleDriverLocation);
     socket.on("booking:completed", handleCompleted);
+    socket.on("bookingCancelled", handleCancelled);
 
     return () => {
       socket.off("driver:location", handleDriverLocation);
       socket.off("booking:completed", handleCompleted);
+      socket.off("bookingCancelled", handleCancelled);
     };
   }, [booking?.pickupLat, booking?.pickupLng, bookingId, showToast, stopSharingLocation]);
 
@@ -247,10 +275,19 @@ function LiveTracking({ showToast }) {
             </div>
           </section>
 
-         
-
           <section className="info-card actions">
-            <button className="outline" onClick={() => navigate("/MyBookings")}>Back to My Bookings</button>
+            {(status !== "completed" && status !== "cancelled") && (
+              <button 
+                className="cancel-btn" 
+                onClick={handleCancelBooking}
+                disabled={isCancelling}
+              >
+                {isCancelling ? "Cancelling..." : "Cancel Booking"}
+              </button>
+            )}
+            {status === "cancelled" && (
+              <button className="outline" onClick={() => navigate("/MyBookings")}>Back to My Bookings</button>
+            )}
             <button className="primary" onClick={() => navigate("/bookAmbulance")}>New Booking</button>
           </section>
         </div>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { joinBookingRoom, emitDriverLocation, onUserLocation } from "../utils/socket";
+import { joinBookingRoom, emitDriverLocation, onUserLocation, getSocket } from "../utils/socket";
 import { getAmbulanceIconUrl, getPoliceIconUrl } from "../utils/mapIcons";
 import "../styles/DriverDashboard.css";
 
@@ -15,6 +15,7 @@ const DriverDashboard = ({ showToast }) => {
   const [addresses, setAddresses] = useState({});
   const [driverProfile, setDriverProfile] = useState(null);
   const [profileError, setProfileError] = useState("");
+  const [cancellationMessage, setCancellationMessage] = useState("");
   
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
@@ -223,6 +224,34 @@ const DriverDashboard = ({ showToast }) => {
     // Join socket room
     joinBookingRoom(activeBooking._id, "driver");
 
+    // Listen for booking cancellation by user
+    const socket = getSocket();
+    const handleBookingCancelled = (payload) => {
+      const payloadId = payload?.bookingId || payload?._id;
+      
+      if (payloadId && String(payloadId) !== String(activeBooking._id)) {
+        return;
+      }
+      
+      // Set cancellation message to display in UI
+      setCancellationMessage("⚠️ User has cancelled the booking");
+      showToast("⚠️ User has cancelled the booking", "error");
+      
+      // Delay setting activeBooking to null to ensure state updates are processed
+      setTimeout(() => {
+        setActiveBooking(null);
+      }, 100);
+      
+      if (trackingInterval.current) clearInterval(trackingInterval.current);
+      // Clear map markers
+      if (pickupMarker.current) pickupMarker.current.setMap(null);
+      if (destinationMarker.current) destinationMarker.current.setMap(null);
+      if (driverMarker.current) driverMarker.current.setMap(null);
+      policeMarkers.current.forEach(marker => marker.setMap(null));
+      policeMarkers.current = [];
+    };
+    socket.on("bookingCancelled", handleBookingCancelled);
+
     // Listen for user location updates
     onUserLocation((userLoc) => {
       if (userLoc && userLoc.lat && userLoc.lng) {
@@ -325,8 +354,10 @@ const DriverDashboard = ({ showToast }) => {
       // Clear police markers on cleanup
       policeMarkers.current.forEach(marker => marker.setMap(null));
       policeMarkers.current = [];
+      // Remove socket listener
+      socket.off("bookingCancelled", handleBookingCancelled);
     };
-  }, [activeBooking]);
+  }, [activeBooking, showToast]);
 
   const updateDriverMarker = (loc) => {
     if (!mapInstance.current) return;
@@ -436,13 +467,23 @@ const DriverDashboard = ({ showToast }) => {
   };
 
   const completeBooking = async () => {
+    if (!activeBooking) {
+      showToast("No active booking to complete", "error");
+      return;
+    }
+
     try {
       const res = await fetch(`/api/bookings/${activeBooking._id}/complete`, {
         method: "PUT",
         credentials: "include",
       });
 
-      if (!res.ok) throw new Error("Failed to complete booking");
+      const data = await res.json();
+
+      if (!res.ok) {
+        showToast(data.message || "Failed to complete booking", "error");
+        return;
+      }
       
       showToast("✅ Booking completed!", "success");
       setActiveBooking(null);
@@ -621,6 +662,14 @@ const DriverDashboard = ({ showToast }) => {
           ) : (
             <div className="off-duty-message">
               <p>Toggle "Go On Duty" to start receiving booking requests</p>
+            </div>
+          )}
+
+          {/* Cancellation Message */}
+          {cancellationMessage && (
+            <div className="cancellation-alert">
+              <span>{cancellationMessage}</span>
+              <button onClick={() => setCancellationMessage("")} className="dismiss-btn">×</button>
             </div>
           )}
         </>

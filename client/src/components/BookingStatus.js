@@ -1,7 +1,7 @@
 // Booking status components
 import React from "react";
 
-export const SearchingOverlay = ({ searchingTime, maxSearchTime = 90, isTimeout = false, onRetry }) => {
+export const SearchingOverlay = ({ searchingTime, maxSearchTime = 90, isTimeout = false, onRetry, onCancel, isCancelling = false }) => {
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -55,12 +55,21 @@ export const SearchingOverlay = ({ searchingTime, maxSearchTime = 90, isTimeout 
           <div className="spinner"></div>
           <span className="search-wait-text">Please wait...</span>
         </div>
+        {onCancel && (
+          <button 
+            className="cancel-search-btn" 
+            onClick={onCancel}
+            disabled={isCancelling}
+          >
+            {isCancelling ? "Cancelling..." : "✕ Cancel Request"}
+          </button>
+        )}
       </div>
     </div>
   );
 };
 
-export const DriverPanel = ({ driver, estimatedTime, driverLocation, userLocation, isTracking }) => {
+export const DriverPanel = ({ driver, estimatedTime, driverLocation, userLocation, isTracking, onCancel, isCancelling = false }) => {
   return (
     <div className="driver-panel">
       <div className="driver-header">
@@ -73,6 +82,15 @@ export const DriverPanel = ({ driver, estimatedTime, driverLocation, userLocatio
       <div className="driver-eta-box">
         <p className="driver-eta-text">ETA: {estimatedTime} minutes</p>
       </div>
+      {onCancel && (
+        <button 
+          className="cancel-booking-btn" 
+          onClick={onCancel}
+          disabled={isCancelling}
+        >
+          {isCancelling ? "Cancelling..." : "Cancel Booking"}
+        </button>
+      )}
       
       {/* Real-time location info */}
       <div className="location-info">

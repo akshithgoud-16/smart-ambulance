@@ -74,6 +74,53 @@ router.get("/", isAuthenticated, async (req, res) => {
   }
 });
 
+// PUT /api/bookings/:id/cancel → cancel a booking (user)
+router.put("/:id/cancel", isAuthenticated, async (req, res) => {
+  try {
+    const booking = await Booking.findOne({
+      _id: req.params.id,
+      user: req.user._id,
+      status: { $in: ["pending", "accepted"] } // Can only cancel pending or accepted bookings
+    });
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found or cannot be cancelled" });
+    }
+
+    console.log(`📢 Cancelling booking ${booking._id}, status: ${booking.status}, driver: ${booking.driver}`);
+
+    const hadDriver = booking.driver; // Save driver reference before status change
+    booking.status = "cancelled";
+    await booking.save();
+
+    // Emit socket event to notify driver if booking was accepted (had a driver)
+    const io = req.app.get("io");
+    console.log(`📢 IO available: ${!!io}, Had driver: ${!!hadDriver}`);
+    
+    if (io && hadDriver) {
+      const roomName = `booking:${booking._id}`;
+      console.log(`📢 Emitting bookingCancelled to room: ${roomName}`);
+      
+      // Get room members for debugging
+      const room = io.sockets.adapter.rooms.get(roomName);
+      console.log(`📢 Room ${roomName} has ${room ? room.size : 0} members`);
+      
+      io.to(roomName).emit("bookingCancelled", {
+        bookingId: booking._id.toString(),
+        message: "Booking has been cancelled by the user"
+      });
+      console.log(`📢 bookingCancelled event emitted`);
+    } else {
+      console.log(`📢 Skipping socket emit - IO: ${!!io}, hadDriver: ${!!hadDriver}`);
+    }
+
+    res.json({ message: "Booking cancelled successfully", booking });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 // GET /api/bookings/pending-check → check if user has a pending booking
 router.get("/pending-check", isAuthenticated, async (req, res) => {
   try {
