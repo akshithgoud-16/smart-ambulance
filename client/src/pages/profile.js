@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import "../styles/policeProfile.css";
 
 function UserProfile({ showToast }) {
   const [form, setForm] = useState({
@@ -96,7 +95,6 @@ function UserProfile({ showToast }) {
     <div className="police-profile-page">
       <div className="profile-header">
         <div>
-          <h2>User Profile</h2>
           <p>Update your personal details for better service.</p>
         </div>
         <button className="refresh-btn" onClick={fetchProfile} disabled={loading}>

@@ -11,7 +11,7 @@ import "../styles/bookAmbulance.css";
 
 function BookAmbulance({ showToast }) {
   // Booking state
-  const [bookingStatus, setBookingStatus] = useState(null); // null, 'searching', 'accepted', 'completed'
+  const [bookingStatus, setBookingStatus] = useState(null); // null, 'searching', 'accepted', 'completed', 'timeout'
   const [currentBooking, setCurrentBooking] = useState(null);
   const [driver, setDriver] = useState(null);
   const [searchingTime, setSearchingTime] = useState(0);
@@ -19,6 +19,9 @@ function BookAmbulance({ showToast }) {
   const [driverLocation, setDriverLocation] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
   const [isTracking, setIsTracking] = useState(false);
+  
+  // Search timeout constant (90 seconds)
+  const SEARCH_TIMEOUT_SECONDS = 90;
 
   // Refs
   const mapRef = useRef(null);
@@ -125,10 +128,17 @@ function BookAmbulance({ showToast }) {
       try {
         const { hasPendingBooking, booking } = await checkPendingBooking();
         if (hasPendingBooking && booking) {
-          // Restore searching state for existing pending booking
-          setCurrentBooking(booking);
-          setBookingStatus("searching");
-          showToast("🔍 You have an existing booking request. Searching for ambulance...", "info");
+          // Calculate elapsed time since booking was created
+          const createdAt = new Date(booking.createdAt);
+          const elapsedSeconds = Math.floor((Date.now() - createdAt.getTime()) / 1000);
+          
+          // Only restore if within the timeout window
+          if (elapsedSeconds < SEARCH_TIMEOUT_SECONDS) {
+            setCurrentBooking(booking);
+            setBookingStatus("searching");
+            setSearchingTime(elapsedSeconds); // Resume from where it was
+            showToast("🔍 You have an existing booking request. Searching for ambulance...", "info");
+          }
         }
       } catch (err) {
         console.error("Error checking pending booking:", err);
@@ -138,14 +148,23 @@ function BookAmbulance({ showToast }) {
     checkExistingBooking();
   }, [showToast]);
 
-  // Track searching time while in 'searching' state
+  // Track searching time while in 'searching' state and handle timeout
   useEffect(() => {
     if (bookingStatus !== "searching") return;
     const intervalId = setInterval(() => {
-      setSearchingTime((prev) => prev + 1);
+      setSearchingTime((prev) => {
+        const newTime = prev + 1;
+        // Check for timeout after 90 seconds
+        if (newTime >= SEARCH_TIMEOUT_SECONDS) {
+          setBookingStatus("timeout");
+          showToast("No drivers available at the moment. Please try again later.", "error");
+          return newTime;
+        }
+        return newTime;
+      });
     }, 1000);
     return () => clearInterval(intervalId);
-  }, [bookingStatus]);
+  }, [bookingStatus, showToast]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -353,7 +372,23 @@ useEffect(() => {
 
       {/* Booking Status Overlays */}
       {bookingStatus === "searching" && (
-        <SearchingOverlay searchingTime={searchingTime} />
+        <SearchingOverlay 
+          searchingTime={searchingTime} 
+          maxSearchTime={SEARCH_TIMEOUT_SECONDS}
+        />
+      )}
+
+      {bookingStatus === "timeout" && (
+        <SearchingOverlay 
+          searchingTime={searchingTime} 
+          maxSearchTime={SEARCH_TIMEOUT_SECONDS}
+          isTimeout={true}
+          onRetry={() => {
+            setBookingStatus(null);
+            setSearchingTime(0);
+            setCurrentBooking(null);
+          }}
+        />
       )}
 
       {bookingStatus === "accepted" && driver && (

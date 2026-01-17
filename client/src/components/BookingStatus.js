@@ -1,12 +1,40 @@
 // Booking status components
 import React from "react";
 
-export const SearchingOverlay = ({ searchingTime }) => {
+export const SearchingOverlay = ({ searchingTime, maxSearchTime = 90, isTimeout = false, onRetry }) => {
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
+
+  // Calculate progress percentage for search progress bar
+  const progressPercentage = Math.min((searchingTime / maxSearchTime) * 100, 100);
+
+  // Show timeout state
+  if (isTimeout) {
+    return (
+      <div className="search-overlay">
+        <div className="search-card timeout-card">
+          <div className="search-emoji">😔</div>
+          <h2 className="search-title">No Drivers Available</h2>
+          <p className="search-subtitle">
+            All our ambulance drivers are currently busy attending to other emergencies.
+          </p>
+          <div className="timeout-info-box">
+            <p className="timeout-info-text">
+              We apologize for the inconvenience. Please try again in a few minutes.
+            </p>
+          </div>
+          <div className="timeout-actions">
+            <button className="retry-btn" onClick={onRetry}>
+              🔄 Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="search-overlay">
@@ -16,6 +44,12 @@ export const SearchingOverlay = ({ searchingTime }) => {
         <p className="search-subtitle">Finding the nearest available ambulance near you...</p>
         <div className="search-time-box">
           <p className="search-time-text">Search time: {formatTime(searchingTime)}</p>
+          <div className="search-progress-bar">
+            <div 
+              className="search-progress-fill" 
+              style={{ width: `${progressPercentage}%` }}
+            />
+          </div>
         </div>
         <div className="search-wait">
           <div className="spinner"></div>

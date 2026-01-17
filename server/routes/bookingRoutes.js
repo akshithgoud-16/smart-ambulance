@@ -17,10 +17,15 @@ router.post("/", isAuthenticated, async (req, res) => {
   try {
     const { pickup, destination, pickupLat, pickupLng, destLat, destLng } = req.body;
 
-    // Check if user already has a pending booking
+    // Search timeout constant (90 seconds) - must match client-side
+    const SEARCH_TIMEOUT_MS = 90 * 1000;
+    const cutoffTime = new Date(Date.now() - SEARCH_TIMEOUT_MS);
+
+    // Check if user already has an ACTIVE pending booking (created within timeout window)
     const existingPendingBooking = await Booking.findOne({
       user: req.user._id,
-      status: "pending"
+      status: "pending",
+      createdAt: { $gte: cutoffTime }
     });
 
     if (existingPendingBooking) {
@@ -29,6 +34,16 @@ router.post("/", isAuthenticated, async (req, res) => {
         existingBooking: existingPendingBooking
       });
     }
+
+    // Cancel any old stale pending bookings (older than timeout)
+    await Booking.updateMany(
+      {
+        user: req.user._id,
+        status: "pending",
+        createdAt: { $lt: cutoffTime }
+      },
+      { status: "cancelled" }
+    );
 
     const booking = new Booking({
       user: req.user._id,
@@ -62,9 +77,15 @@ router.get("/", isAuthenticated, async (req, res) => {
 // GET /api/bookings/pending-check → check if user has a pending booking
 router.get("/pending-check", isAuthenticated, async (req, res) => {
   try {
+    // Only consider bookings created within the last 90 seconds as "active pending"
+    // Older pending bookings are considered stale (no driver was found)
+    const SEARCH_TIMEOUT_MS = 90 * 1000; // 90 seconds
+    const cutoffTime = new Date(Date.now() - SEARCH_TIMEOUT_MS);
+    
     const pendingBooking = await Booking.findOne({
       user: req.user._id,
-      status: "pending"
+      status: "pending",
+      createdAt: { $gte: cutoffTime } // Only bookings created within the timeout window
     });
     
     res.json({ 
