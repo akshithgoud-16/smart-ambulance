@@ -1,6 +1,7 @@
 // src/App.js
 import React, { useState, useEffect, useCallback } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { getSocket } from "./utils/socket";
 
 
 // Pages & Components
@@ -19,6 +20,7 @@ import PoliceBookingDetail from "./pages/PoliceBookingDetail";
 import PoliceProfile from "./pages/PoliceProfile";
 import DriverProfile from "./pages/DriverProfile";
 import UserProfile from "./pages/profile";
+import BloodHub from "./pages/BloodHub";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Toast from "./components/Toast";
@@ -38,6 +40,16 @@ function App() {
   useEffect(() => {
     const loggedIn = localStorage.getItem("isLoggedIn") === "true";
     setIsLoggedIn(loggedIn);
+
+    // Join user room for blood notifications if logged in as user
+    if (loggedIn) {
+      const userId = localStorage.getItem("userId");
+      const role = localStorage.getItem("role");
+      if (userId && role === "user") {
+        const socket = getSocket();
+        socket.emit("user:join", userId);
+      }
+    }
   }, []);
 
   return (
@@ -96,6 +108,11 @@ function App() {
         <Route path="/profile" element={
           <ProtectedRoute allowedRoles={["user"]}>
             <UserProfile showToast={showToast} />
+          </ProtectedRoute>
+        }/>
+        <Route path="/bloodhub" element={
+          <ProtectedRoute allowedRoles={["user"]}>
+            <BloodHub showToast={showToast} />
           </ProtectedRoute>
         }/>
       </Routes>

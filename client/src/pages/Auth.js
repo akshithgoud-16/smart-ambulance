@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Auth.css";
+import { getSocket } from "../utils/socket";
 
 function Auth({ setIsLoggedIn }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -43,6 +44,13 @@ function Auth({ setIsLoggedIn }) {
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("role", data.user.role);
       localStorage.setItem("username", data.user.username);
+      localStorage.setItem("userId", data.user._id);
+
+      // Join user room for blood notifications
+      if (data.user.role === "user") {
+        const socket = getSocket();
+        socket.emit("user:join", data.user._id);
+      }
 
       setIsLoggedIn(true);
 

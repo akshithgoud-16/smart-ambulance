@@ -13,7 +13,16 @@ router.post('/signup', async (req, res) => {
     // Auto-login after signup
     req.login(registeredUser, (err) => {
       if (err) return res.status(500).json({ message: 'Login failed after signup' });
-      res.json({ message: 'Signup successful', user: registeredUser });
+      res.json({ 
+        message: 'Signup successful', 
+        user: {
+          _id: registeredUser._id,
+          username: registeredUser.username,
+          email: registeredUser.email,
+          role: registeredUser.role,
+          bloodGroup: registeredUser.bloodGroup,
+        }
+      });
     });
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -31,10 +40,11 @@ router.post('/login', (req, res, next) => {
       res.json({
         message: 'Login successful',
         user: {
-          id: user._id,
+          _id: user._id,
           username: user.username,
           email: user.email,
           role: user.role,
+          bloodGroup: user.bloodGroup,
         },
       });
     });

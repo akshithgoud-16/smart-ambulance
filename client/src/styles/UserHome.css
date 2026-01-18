@@ -695,4 +695,131 @@
   .ambulance-icon {
     font-size: 70px;
   }
+
+  .cta-buttons-container {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .footer-cta-buttons {
+    flex-direction: column;
+    gap: 15px;
+  }
+}
+
+/* CTA Buttons Container */
+.cta-buttons-container {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Blood Hub Button Styles */
+.blood-hub-btn {
+  background: linear-gradient(135deg, #9b2335, #7b1a28) !important;
+  color: white !important;
+  display: inline-flex !important;
+  align-items: center;
+  gap: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.blood-hub-btn:hover {
+  background: linear-gradient(135deg, #b52a3f, #9b2335) !important;
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.blood-hub-btn i {
+  font-size: 1.2rem;
+}
+
+/* Footer CTA Buttons */
+.footer-cta-buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.blood-hub-footer-btn {
+  background: linear-gradient(135deg, #9b2335, #7b1a28) !important;
+  color: white !important;
+  display: inline-flex !important;
+  align-items: center;
+  gap: 10px;
+}
+
+.blood-hub-footer-btn:hover {
+  background: linear-gradient(135deg, #b52a3f, #9b2335) !important;
+}
+
+/* Blood Request Alert Banner */
+.blood-request-banner {
+  position: fixed;
+  top: 75px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  box-shadow: 0 8px 30px rgba(231, 76, 60, 0.5);
+  animation: slideDownBanner 0.5s ease, pulseBanner 2s infinite;
+  max-width: 90%;
+  font-weight: 600;
+}
+
+.blood-request-banner:hover {
+  transform: translateX(-50%) scale(1.02);
+}
+
+.blood-request-banner i {
+  font-size: 1.3rem;
+}
+
+.blood-request-banner .close-banner {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: #fff;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 10px;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.blood-request-banner .close-banner:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+@keyframes slideDownBanner {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes pulseBanner {
+  0%, 100% {
+    box-shadow: 0 8px 30px rgba(231, 76, 60, 0.5);
+  }
+  50% {
+    box-shadow: 0 8px 45px rgba(231, 76, 60, 0.8);
+  }
 }

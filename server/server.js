@@ -12,6 +12,7 @@ const authRoutes = require("./routes/auth");
 const bookingRoutes = require("./routes/bookingRoutes");
 const policeRoutes = require("./routes/policeRoutes");
 const userRoutes = require("./routes/userRoutes");
+const bloodRoutes = require("./routes/bloodRoutes");
 const { errorHandler, notFound } = require("./middleware/errorMiddleware");
 
 const app = express();
@@ -86,6 +87,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/police", policeRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/blood", bloodRoutes);
 
 // Example protected route
 app.get("/api/profile", (req, res) => {
@@ -119,6 +121,15 @@ io.on("connection", (socket) => {
     if (!policeId) return;
     socket.join(`police:${policeId}`);
     console.log(`👮 Police joined room police:${policeId}`);
+  });
+
+  // ================================
+  // ✅ NEW: User joins OWN room (for blood notifications)
+  // ================================
+  socket.on("user:join", (userId) => {
+    if (!userId) return;
+    socket.join(`user:${userId}`);
+    console.log(`👤 User joined room user:${userId}`);
   });
 
   // Driver shares live location

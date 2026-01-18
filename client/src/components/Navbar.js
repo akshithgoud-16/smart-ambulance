@@ -29,6 +29,7 @@ function Navbar({ isLoggedIn, setIsLoggedIn }) {
       localStorage.removeItem("isLoggedIn");
       localStorage.removeItem("role");
       localStorage.removeItem("username");
+      localStorage.removeItem("userId");
       setIsLoggedIn(false);
       navigate("/auth");
       setOpen(false);

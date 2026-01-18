@@ -1,6 +1,6 @@
 /* General background animation */
-body, html {
-  height: 100%;
+.auth-page {
+  min-height: 100vh;
   margin: 0;
   font-family: 'Poppins', sans-serif;
 }
@@ -14,7 +14,8 @@ body, html {
   position: relative;
 }
 
-/* Animated gradient overlay */
+/* Animated gradient overlay - disabled for simplicity */
+/*
 .auth-container::before {
   content: "";
   position: absolute;
@@ -31,6 +32,7 @@ body, html {
   0% { transform: rotate(0deg);}
   100% { transform: rotate(360deg);}
 }
+*/
 
 /* Glassmorphism card */
 .auth-card-glass {

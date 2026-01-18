@@ -116,6 +116,47 @@ export function onPoliceAlert(handler) {
 
 /**
  * -----------------------------
+ * USER ROOMS (For Blood Hub)
+ * -----------------------------
+ */
+
+// User joins OWN isolated room
+export function joinUserRoom(userId) {
+  const socket = getSocket();
+  socket.emit("user:join", userId);
+  console.log(`👤 Joined user room: user:${userId}`);
+}
+
+// User receives blood request notification
+export function onBloodRequest(handler) {
+  const socket = getSocket();
+  socket.off("blood:request");
+  socket.on("blood:request", handler);
+}
+
+// User receives blood request accepted notification
+export function onBloodAccepted(handler) {
+  const socket = getSocket();
+  socket.off("blood:accepted");
+  socket.on("blood:accepted", handler);
+}
+
+// Blood donation completed notification
+export function onBloodCompleted(handler) {
+  const socket = getSocket();
+  socket.off("blood:completed");
+  socket.on("blood:completed", handler);
+}
+
+// Blood request cancelled notification
+export function onBloodCancelled(handler) {
+  const socket = getSocket();
+  socket.off("blood:cancelled");
+  socket.on("blood:cancelled", handler);
+}
+
+/**
+ * -----------------------------
  * DISCONNECT
  * -----------------------------
  */

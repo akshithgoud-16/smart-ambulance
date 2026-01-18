@@ -1,10 +1,60 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import "../styles/UserHome.css";
+import { getSocket } from "../utils/socket";
 
-const Home = () => {
+const Home = ({ showToast }) => {
+  const navigate = useNavigate();
+  const [bloodRequestAlert, setBloodRequestAlert] = useState(null);
+
+  useEffect(() => {
+    const socket = getSocket();
+    const userId = localStorage.getItem("userId");
+    
+    // Join user's personal room for notifications
+    if (userId) {
+      socket.emit("user:join", userId);
+    }
+
+    // Listen for blood request notifications
+    socket.on("blood:request", (data) => {
+      setBloodRequestAlert(data);
+      if (showToast) {
+        showToast(`Urgent blood request for ${data.bloodGroup}!`, "info");
+      }
+    });
+
+    return () => {
+      socket.off("blood:request");
+    };
+  }, [showToast]);
+
+  const handleBloodAlertClick = () => {
+    setBloodRequestAlert(null);
+    navigate("/bloodhub", { state: { scrollTo: "donations" } });
+  };
+
+  const dismissBloodAlert = (e) => {
+    e.stopPropagation();
+    setBloodRequestAlert(null);
+  };
+
   return (
     <div className="home-container">
+      {/* Blood Request Alert Banner */}
+      {bloodRequestAlert && (
+        <div className="blood-request-banner" onClick={handleBloodAlertClick}>
+          <i className="fa-solid fa-droplet"></i>
+          <span>
+            🩸 Urgent: {bloodRequestAlert.bloodGroup} blood needed at {bloodRequestAlert.hospital}!
+            Click to donate
+          </span>
+          <button className="close-banner" onClick={dismissBloodAlert}>
+            <i className="fa-solid fa-times"></i>
+          </button>
+        </div>
+      )}
+
       {/* Hero Section */}
       <section className="hero">
         <div className="hero-content">
@@ -17,9 +67,14 @@ const Home = () => {
           <p className="hero-subtitle">
             Your emergency response partner, just a click away
           </p>
-          <Link to="/bookambulance" className="cta-button">
-            Book Ambulance Now
-          </Link>
+          <div className="cta-buttons-container">
+            <Link to="/bookambulance" className="cta-button">
+              Book Ambulance Now
+            </Link>
+            <Link to="/bloodhub" className="cta-button blood-hub-btn">
+              <i className="fa-solid fa-droplet"></i> Blood Hub
+            </Link>
+          </div>
         </div>
         <div className="hero-visual">
           <div className="pulse-ring"></div>
@@ -212,9 +267,14 @@ const Home = () => {
       <section className="footer-cta">
         <h2>Ready to Get Started?</h2>
         <p>Emergency medical help is just one click away</p>
-        <Link to="/bookambulance" className="cta-button-large">
-          Book Your Ambulance Now
-        </Link>
+        <div className="footer-cta-buttons">
+          <Link to="/bookambulance" className="cta-button-large">
+            Book Your Ambulance Now
+          </Link>
+          <Link to="/bloodhub" className="cta-button-large blood-hub-footer-btn">
+            <i className="fa-solid fa-droplet"></i> Blood Hub
+          </Link>
+        </div>
       </section>
     </div>
   );
