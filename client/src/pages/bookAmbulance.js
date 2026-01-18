@@ -1,6 +1,6 @@
 // src/pages/BookAmbulance.js - Refactored
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation as useRouterLocation } from "react-router-dom";
 import { MapManager, initializeAutocomplete } from "../utils/mapUtils";
 import { useLocation } from "../hooks/useLocation";
 import { useBookingSocket } from "../hooks/useBookingSocket";
@@ -30,6 +30,7 @@ function BookAmbulance({ showToast }) {
   const statusPollingRef = useRef(null);
   const driverLocationPollingRef = useRef(null);
   const navigate = useNavigate();
+  const routerLocation = useRouterLocation();
 
   // Stable refs for passing latest callbacks into the map listener
   const handleMapClickRef = useRef(null);
@@ -123,9 +124,55 @@ function BookAmbulance({ showToast }) {
     }
   }, [locationMode]);
 
+  // Handle driver cancellation redirect - auto-search for new driver
+  useEffect(() => {
+    const handleDriverCancelledRedirect = async () => {
+      if (routerLocation.state?.driverCancelled && routerLocation.state?.bookingId) {
+        console.log("🔄 Driver cancelled redirect detected, bookingId:", routerLocation.state.bookingId);
+        
+        // Immediately set to searching state while we fetch booking data
+        setBookingStatus("searching");
+        setSearchingTime(0);
+        setDriver(null);
+        setIsTracking(false);
+        setDriverLocation(null);
+        setEstimatedTime(null);
+        
+        try {
+          // Fetch the updated booking (now back to pending status)
+          const booking = await getBookingById(routerLocation.state.bookingId);
+          console.log("🔄 Fetched booking:", booking);
+          if (booking) {
+            setCurrentBooking(booking);
+            showToast("🔍 Searching for another ambulance...", "info");
+          }
+          // Clear the navigation state to prevent re-triggering
+          window.history.replaceState({}, document.title);
+        } catch (err) {
+          console.error("Error fetching booking after driver cancel:", err);
+          // Fallback: check for pending booking
+          try {
+            const { hasPendingBooking, booking } = await checkPendingBooking();
+            if (hasPendingBooking && booking) {
+              setCurrentBooking(booking);
+              showToast("🔍 Searching for another ambulance...", "info");
+            }
+          } catch (fallbackErr) {
+            console.error("Fallback also failed:", fallbackErr);
+          }
+        }
+      }
+    };
+    
+    handleDriverCancelledRedirect();
+  }, [routerLocation.state, showToast]);
+
   // Check for existing pending booking on page load
   useEffect(() => {
     const checkExistingBooking = async () => {
+      // Skip if we're handling a driver cancellation redirect
+      if (routerLocation.state?.driverCancelled) return;
+      
       try {
         const { hasPendingBooking, booking } = await checkPendingBooking();
         if (hasPendingBooking && booking) {
@@ -147,7 +194,7 @@ function BookAmbulance({ showToast }) {
     };
     
     checkExistingBooking();
-  }, [showToast]);
+  }, [showToast, routerLocation.state]);
 
   // Track searching time while in 'searching' state and handle timeout
   useEffect(() => {
@@ -214,6 +261,23 @@ useEffect(() => {
       setBookingStatus("completed");
       showToast("✅ Ride completed! Thank you for using Smart Ambulance.", "success");
       setIsTracking(false);
+    },
+
+    // Handle driver cancellation - auto re-search for new driver
+    onDriverCancelledCallback: (payload) => {
+      console.log("⚠️ Driver cancelled booking", payload);
+      showToast("⚠️ Driver cancelled. Searching for another ambulance...", "warning");
+      
+      // Reset to searching state
+      setBookingStatus("searching");
+      setDriver(null);
+      setIsTracking(false);
+      setSearchingTime(0);
+      setDriverLocation(null);
+      setEstimatedTime(null);
+      
+      // Navigate back to booking page if on tracking page
+      navigate("/book-ambulance");
     },
 
     onDriverLocationUpdate: async (loc) => {

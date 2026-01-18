@@ -14,6 +14,7 @@ const DriverTracking = ({ showToast }) => {
   const [booking, setBooking] = useState(initialBooking);
   const [loading, setLoading] = useState(!initialBooking);
   const [pickupAddress, setPickupAddress] = useState("");
+  const [isCancelling, setIsCancelling] = useState(false);
   
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
@@ -320,6 +321,36 @@ const DriverTracking = ({ showToast }) => {
     }
   };
 
+  // Cancel booking by driver
+  const cancelBooking = async () => {
+    if (!booking?._id) return;
+    
+    setIsCancelling(true);
+    try {
+      const res = await fetch(`/api/bookings/${booking._id}/driver-cancel`, {
+        method: "PUT",
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.message || "Failed to cancel booking");
+      }
+      
+      showToast("⚠️ Booking cancelled. User will be notified to search for another driver.", "info");
+      
+      // Clear tracking interval
+      if (trackingInterval.current) clearInterval(trackingInterval.current);
+      
+      navigate("/driver/dashboard");
+    } catch (err) {
+      console.error(err);
+      showToast(err.message || "Failed to cancel booking", "error");
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case "pending": return "#ffc107";
@@ -440,6 +471,13 @@ const DriverTracking = ({ showToast }) => {
               <div className="action-buttons">
                 <button onClick={completeBooking} className="btn-complete">
                   ✓ Complete Booking
+                </button>
+                <button 
+                  onClick={cancelBooking} 
+                  className="btn-cancel-booking"
+                  disabled={isCancelling}
+                >
+                  {isCancelling ? "Cancelling..." : "✕ Cancel Booking"}
                 </button>
               </div>
             )}

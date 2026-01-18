@@ -137,12 +137,46 @@ function LiveTracking({ showToast }) {
     return stopSharingLocation;
   }, [shareUserLocation, stopSharingLocation, status]);
 
+  // Polling fallback to detect if driver cancelled (status changed to pending)
+  useEffect(() => {
+    if (!bookingId || status !== "accepted") return;
+
+    const pollBookingStatus = async () => {
+      try {
+        const res = await fetch(`/api/bookings/${bookingId}`, {
+          credentials: "include",
+        });
+        if (res.ok) {
+          const data = await res.json();
+          // If booking is back to pending, driver cancelled
+          if (data.status === "pending") {
+            console.log("📡 Polling detected booking status changed to pending - driver cancelled");
+            showToast("⚠️ Driver cancelled. Searching for another ambulance...", "warning");
+            stopSharingLocation();
+            navigate(`/track/${bookingId}`, { 
+              state: { 
+                driverCancelled: true, 
+                bookingId: bookingId 
+              } 
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Error polling booking status:", err);
+      }
+    };
+
+    const pollInterval = setInterval(pollBookingStatus, 5000);
+    return () => clearInterval(pollInterval);
+  }, [bookingId, status, navigate, showToast, stopSharingLocation]);
+
   // Wire up socket listeners for driver location and completion
   useEffect(() => {
     if (!bookingId) return;
 
     const socket = getSocket();
     joinBookingRoom(bookingId, "user");
+    console.log("🟢 User joined booking room:", bookingId);
 
     const handleDriverLocation = async (loc) => {
       if (!loc || typeof loc.lat !== "number" || typeof loc.lng !== "number") return;
@@ -178,16 +212,39 @@ function LiveTracking({ showToast }) {
       stopSharingLocation();
     };
 
+    // Handle driver cancellation - redirect to book ambulance page to re-search
+    const handleDriverCancelled = (payload) => {
+      console.log("📡 Received booking:driver-cancelled event:", payload);
+      const payloadId = payload?.bookingId || payload?._id;
+      if (payloadId && String(payloadId) !== String(bookingId)) {
+        console.log("📡 Ignoring event - bookingId mismatch");
+        return;
+      }
+
+      console.log("📡 Processing driver cancellation, redirecting to book-ambulance");
+      showToast("⚠️ Driver cancelled. Searching for another ambulance...", "warning");
+      stopSharingLocation();
+      // Pass booking info to trigger auto-search
+      navigate("/bookAmbulance", { 
+        state: { 
+          driverCancelled: true, 
+          bookingId: bookingId 
+        } 
+      });
+    };
+
     socket.on("driver:location", handleDriverLocation);
     socket.on("booking:completed", handleCompleted);
     socket.on("bookingCancelled", handleCancelled);
+    socket.on("booking:driver-cancelled", handleDriverCancelled);
 
     return () => {
       socket.off("driver:location", handleDriverLocation);
       socket.off("booking:completed", handleCompleted);
       socket.off("bookingCancelled", handleCancelled);
+      socket.off("booking:driver-cancelled", handleDriverCancelled);
     };
-  }, [booking?.pickupLat, booking?.pickupLng, bookingId, showToast, stopSharingLocation]);
+  }, [booking?.pickupLat, booking?.pickupLng, bookingId, navigate, showToast, stopSharingLocation]);
 
   if (!bookingId) {
     return (

@@ -16,6 +16,8 @@ const DriverDashboard = ({ showToast }) => {
   const [driverProfile, setDriverProfile] = useState(null);
   const [profileError, setProfileError] = useState("");
   const [cancellationMessage, setCancellationMessage] = useState("");
+  const [dismissedBookings, setDismissedBookings] = useState(new Set());
+  const [isCancelling, setIsCancelling] = useState(false);
   
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
@@ -75,8 +77,10 @@ const DriverDashboard = ({ showToast }) => {
         const res = await fetch("/api/bookings/pending", { credentials: "include" });
         if (res.ok) {
           const data = await res.json();
-          setPendingBookings(data);
-          data.forEach(booking => {
+          // Filter out dismissed bookings
+          const filteredData = data.filter(booking => !dismissedBookings.has(booking._id));
+          setPendingBookings(filteredData);
+          filteredData.forEach(booking => {
             if (booking.pickupLat && booking.pickupLng) {
               getAddressFromCoords(booking._id, booking.pickupLat, booking.pickupLng);
             }
@@ -91,7 +95,7 @@ const DriverDashboard = ({ showToast }) => {
     fetchBookings();
     const interval = setInterval(fetchBookings, 5000);
     return () => clearInterval(interval);
-  }, [onDuty, showToast]);
+  }, [onDuty, showToast, dismissedBookings]);
 
   // Initialize Google Map when active booking exists
   useEffect(() => {
@@ -443,6 +447,14 @@ const DriverDashboard = ({ showToast }) => {
     }
   };
 
+  // Dismiss a booking request (driver doesn't want to accept it)
+  const dismissBooking = (id) => {
+    // Add to dismissed set so it won't reappear on next fetch
+    setDismissedBookings(prev => new Set([...prev, id]));
+    setPendingBookings(prev => prev.filter(b => b._id !== id));
+    showToast("Booking dismissed", "info");
+  };
+
   const acceptBooking = async (id) => {
     try {
       const res = await fetch(`/api/bookings/${id}/accept`, {
@@ -504,6 +516,41 @@ const DriverDashboard = ({ showToast }) => {
     }
   };
 
+  // Cancel booking by driver
+  const cancelBooking = async () => {
+    if (!activeBooking?._id) return;
+    
+    setIsCancelling(true);
+    try {
+      const res = await fetch(`/api/bookings/${activeBooking._id}/driver-cancel`, {
+        method: "PUT",
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.message || "Failed to cancel booking");
+      }
+      
+      showToast("⚠️ Booking cancelled. User will be notified to search for another driver.", "info");
+      setActiveBooking(null);
+      
+      // Clear map markers
+      if (pickupMarker.current) pickupMarker.current.setMap(null);
+      if (destinationMarker.current) destinationMarker.current.setMap(null);
+      if (driverMarker.current) driverMarker.current.setMap(null);
+      policeMarkers.current.forEach(marker => marker.setMap(null));
+      policeMarkers.current = [];
+      
+      if (trackingInterval.current) clearInterval(trackingInterval.current);
+    } catch (err) {
+      console.error(err);
+      showToast(err.message || "Failed to cancel booking", "error");
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
   const handleFetchLocation = async () => {
     if (!navigator.geolocation) {
       showToast("Geolocation is not supported", "error");
@@ -555,9 +602,6 @@ const DriverDashboard = ({ showToast }) => {
         <span className={`duty-status-badge ${onDuty ? 'on-duty' : 'off-duty'}`}>
           {onDuty ? "On Duty" : "Off Duty"}
         </span>
-        <button onClick={handleFetchLocation} className="btn fetch-location">
-          📍 Fetch Location
-        </button>
         {profileError && (
           <span className="profile-error-message">{profileError}</span>
         )}
@@ -629,10 +673,19 @@ const DriverDashboard = ({ showToast }) => {
                 </div>
               </div>
 
-              {/* Complete Button */}
-              <button onClick={completeBooking} className="btn complete">
-                Mark as Completed
-              </button>
+              {/* Action Buttons */}
+              <div className="action-buttons">
+                <button onClick={completeBooking} className="btn-complete">
+                  ✓ Mark as Completed
+                </button>
+                <button 
+                  onClick={cancelBooking} 
+                  className="btn-cancel-booking"
+                  disabled={isCancelling}
+                >
+                  {isCancelling ? "Cancelling..." : "✕ Cancel Booking"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -652,9 +705,14 @@ const DriverDashboard = ({ showToast }) => {
                     <p><strong>Patient:</strong> {b.user?.username} ({b.user?.mobile})</p>
                     <p><strong>Pickup:</strong> {addresses[b._id] || "Loading address..."}</p>
                     <p><strong>Destination:</strong> {b.destination}</p>
-                    <button onClick={() => acceptBooking(b._id)} className="btn accept">
-                      Accept Request
-                    </button>
+                    <div className="booking-action-buttons">
+                      <button onClick={() => acceptBooking(b._id)} className="btn accept">
+                        Accept Request
+                      </button>
+                      <button onClick={() => dismissBooking(b._id)} className="btn dismiss">
+                        Dismiss
+                      </button>
+                    </div>
                   </div>
                 ))
               )}

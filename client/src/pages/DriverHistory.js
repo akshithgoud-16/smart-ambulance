@@ -150,7 +150,7 @@ const DriverHistory = ({ showToast }) => {
 
               <div className="history-card-footer">
                 <small>{new Date(booking.timestamp).toLocaleString()}</small>
-                {booking.status !== "completed" && (
+                {booking.status === "accepted" && (
                   <button
                     className="track-route-btn"
                     onClick={() => navigate(`/driver/track/${booking._id}`, { state: { booking } })}

@@ -792,11 +792,33 @@
 
 .action-buttons {
   margin-top: 20px;
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
 }
 
 .btn-complete {
-  width: 100%;
+  flex: 1;
   background: linear-gradient(135deg, #28a745, #218838);
+  color: #fff;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-complete:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+}
+
+/* Cancel booking button for driver */
+.btn-cancel-booking {
+  flex: 1;
+  background: linear-gradient(135deg, #dc3545, #c82333);
   color: #fff;
   border: none;
   padding: 14px 24px;
@@ -807,7 +829,51 @@
   transition: all 0.3s ease;
 }
 
-.btn-complete:hover {
+.btn-cancel-booking:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+}
+
+.btn-cancel-booking:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Booking action buttons container for pending bookings */
+.booking-action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.booking-action-buttons .btn {
+  flex: 0 0 auto;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.booking-action-buttons .btn.accept {
+  background: linear-gradient(135deg, #28a745, #218838);
+  color: #fff;
+}
+
+.booking-action-buttons .btn.accept:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+}
+
+.booking-action-buttons .btn.dismiss {
+  background: linear-gradient(135deg, #6c757d, #5a6268);
+  color: #fff;
+}
+
+.booking-action-buttons .btn.dismiss:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
 }

@@ -159,6 +159,45 @@ router.put("/:id/accept", isAuthenticated, isDriver, acceptBooking);
 // PUT /api/bookings/:id/complete → complete a booking
 router.put("/:id/complete", isAuthenticated, isDriver, completeBooking);
 
+// PUT /api/bookings/:id/driver-cancel → cancel a booking (by driver)
+router.put("/:id/driver-cancel", isAuthenticated, isDriver, async (req, res) => {
+  try {
+    const booking = await Booking.findOne({
+      _id: req.params.id,
+      driver: req.user._id,
+      status: "accepted"
+    });
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found or cannot be cancelled" });
+    }
+
+    // Reset booking to pending status so user can search for new driver
+    booking.status = "pending";
+    booking.driver = null;
+    booking.createdAt = new Date(); // Reset the timestamp so it doesn't timeout immediately
+    await booking.save();
+
+    // Emit socket event to notify user that driver cancelled and re-search should begin
+    const io = req.app.get("io");
+    if (io) {
+      console.log(`📢 Emitting booking:driver-cancelled to room booking:${booking._id}`);
+      io.to(`booking:${booking._id}`).emit("booking:driver-cancelled", {
+        bookingId: booking._id.toString(),
+        message: "Driver has cancelled. Searching for a new ambulance..."
+      });
+      console.log(`📢 booking:driver-cancelled event emitted`);
+    } else {
+      console.log(`📢 No io instance available`);
+    }
+
+    res.json({ message: "Booking cancelled. User will be notified to search for another driver.", booking });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 // GET /api/bookings/:id/police-locations → get police locations for a booking (for driver)
 router.get("/:id/police-locations", isAuthenticated, isDriver, async (req, res) => {
   try {

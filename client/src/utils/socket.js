@@ -55,6 +55,13 @@ export function onBookingCompleted(handler) {
   socket.on("booking:completed", handler);
 }
 
+// Booking cancelled by driver (user should re-search)
+export function onDriverCancelled(handler) {
+  const socket = getSocket();
+  socket.off("booking:driver-cancelled");
+  socket.on("booking:driver-cancelled", handler);
+}
+
 /**
  * -----------------------------
  * DRIVER ↔ USER LOCATION

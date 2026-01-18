@@ -6,6 +6,7 @@ import {
   joinBookingRoom,
   onBookingAccepted,
   onBookingCompleted,
+  onDriverCancelled,
   onDriverLocation,
   emitUserLocation
 } from "../utils/socket";
@@ -62,6 +63,7 @@ export const useBookingSocket = (currentBooking, showToast) => {
     const {
       onAccepted,
       onCompleted,
+      onDriverCancelledCallback,
       onDriverLocationUpdate,
       setUserLocation
     } = callbacks;
@@ -97,6 +99,23 @@ export const useBookingSocket = (currentBooking, showToast) => {
       if (String(payloadBookingId) !== bookingId) return;
 
       onCompleted(payload);
+      stopUserLocationSharing();
+    });
+
+    // ⚠️ DRIVER CANCELLED - Re-search for new driver
+    onDriverCancelled((payload) => {
+      console.log("📡 driverCancelled received:", payload);
+
+      const payloadBookingId =
+        payload?.bookingId ||
+        payload?.booking?._id ||
+        payload?._id;
+
+      if (String(payloadBookingId) !== bookingId) return;
+
+      if (onDriverCancelledCallback) {
+        onDriverCancelledCallback(payload);
+      }
       stopUserLocationSharing();
     });
 
