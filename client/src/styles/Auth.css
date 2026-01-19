@@ -14,25 +14,6 @@
   position: relative;
 }
 
-/* Animated gradient overlay - disabled for simplicity */
-/*
-.auth-container::before {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
-  animation: rotate 20s linear infinite;
-  z-index: 1;
-}
-
-@keyframes rotate {
-  0% { transform: rotate(0deg);}
-  100% { transform: rotate(360deg);}
-}
-*/
 
 /* Glassmorphism card */
 .auth-card-glass {
@@ -148,7 +129,7 @@
   left: 1.2rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #e0e0e0;
+  color: #111 !important;
   font-weight: 500;
   pointer-events: none;
   transition: all 0.3s ease;
@@ -159,7 +140,7 @@
   top: -10px;
   left: 1rem;
   font-size: 0.8rem;
-  color: #fff;
+  color: #fff !important;
 }
 
 /* Select dropdown */
