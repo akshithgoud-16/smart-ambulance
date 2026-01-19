@@ -7,6 +7,7 @@ const PoliceDashboard = ({ showToast }) => {
   const [bookings, setBookings] = useState([]);
   const [addresses, setAddresses] = useState({});
   const [loading, setLoading] = useState(true);
+  const [loadingError, setLoadingError] = useState(false);
   const navigate = useNavigate();
 
   // Fetch active bookings from backend
@@ -89,12 +90,29 @@ const PoliceDashboard = ({ showToast }) => {
     navigate(`/police/booking/${bookingId}`);
   };
 
+  // Loading timeout fallback
+  useEffect(() => {
+    if (!loading) return;
+    const timeout = setTimeout(() => {
+      if (loading) {
+        setLoading(false);
+        setLoadingError(true);
+      }
+    }, 10000); // 10 seconds
+    return () => clearTimeout(timeout);
+  }, [loading]);
+
   if (loading) {
     return (
       <div className="police-dashboard">
         <div className="loading-state">
           <div className="loading-spinner"></div>
           <p>Loading active emergencies...</p>
+          {loadingError && (
+            <div style={{color: 'red', marginTop: 16}}>
+              Failed to load emergencies. Please check your connection or try again later.
+            </div>
+          )}
         </div>
       </div>
     );

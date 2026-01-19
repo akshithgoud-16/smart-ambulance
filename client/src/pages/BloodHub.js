@@ -268,6 +268,28 @@ const BloodHub = ({ showToast }) => {
   const currentDonation = myDonations.find((d) => d.status === "accepted");
   const donationHistory = myDonations.filter((d) => d.status === "completed" || d.status === "cancelled");
 
+  // Donor notification on login
+  useEffect(() => {
+    async function notifyDonorIfNeeded() {
+      const role = localStorage.getItem("role");
+      if (role !== "donor") return;
+      // Try to get bloodGroup from profile API
+      let bloodGroup = null;
+      try {
+        const res = await fetch("http://localhost:5000/api/users/profile", { credentials: "include" });
+        const data = await res.json();
+        if (res.ok && data.bloodGroup) bloodGroup = data.bloodGroup;
+      } catch {}
+      if (!bloodGroup) return;
+      // Check for matching pending requests
+      if (pendingRequests.some(r => r.bloodGroup === bloodGroup)) {
+        showToast("You have new blood requests matching your group!", "info");
+      }
+    }
+    if (pendingRequests.length > 0) notifyDonorIfNeeded();
+    // eslint-disable-next-line
+  }, [pendingRequests]);
+
   return (
     <div className="blood-hub-container">
       <div className="blood-hub-header">

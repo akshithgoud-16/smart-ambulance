@@ -39,6 +39,42 @@ const Home = ({ showToast }) => {
     setBloodRequestAlert(null);
   };
 
+  // Donor notification on home page
+  useEffect(() => {
+    async function notifyDonorIfNeeded() {
+      const role = localStorage.getItem("role");
+      if (role !== "donor") return;
+      // Try to get bloodGroup from profile API
+      let bloodGroup = null;
+      try {
+        const res = await fetch("http://localhost:5000/api/users/profile", { credentials: "include" });
+        const data = await res.json();
+        if (res.ok && data.bloodGroup) bloodGroup = data.bloodGroup;
+      } catch {}
+      if (!bloodGroup) return;
+      // Fetch pending requests
+      let pending = [];
+      try {
+        const res = await fetch("http://localhost:5000/api/blood/pending", { credentials: "include" });
+        const data = await res.json();
+        if (res.ok && Array.isArray(data)) pending = data;
+      } catch {}
+      // Check for matching pending requests
+      if (pending.some(r => r.bloodGroup === bloodGroup)) {
+        if (showToast) {
+          showToast(
+            <span style={{cursor:'pointer',textDecoration:'underline'}} onClick={() => navigate("/bloodhub", { state: { scrollTo: "donations" } })}>
+              You have new blood requests matching your group! Click here to view
+            </span>,
+            "info"
+          );
+        }
+      }
+    }
+    notifyDonorIfNeeded();
+    // eslint-disable-next-line
+  }, []);
+
   return (
     <div className="home-container">
       {/* Blood Request Alert Banner */}
