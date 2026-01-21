@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import "../styles/BloodHub.css";
 import { getSocket } from "../utils/socket";
+import { useProfileCompletion } from "../hooks/useProfileCompletion";
 
 const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 const URGENCY_LEVELS = [
@@ -29,6 +30,9 @@ const BloodHub = ({ showToast }) => {
   const [activeTab, setActiveTab] = useState("request");
 
   // Scroll to section based on navigation state
+  // Profile completion status
+  const { isProfileComplete } = useProfileCompletion(!!localStorage.getItem("token"));
+
   useEffect(() => {
     if (location.state?.scrollTo === "donations" && myDonationsRef.current) {
       setTimeout(() => {
@@ -139,6 +143,12 @@ const BloodHub = ({ showToast }) => {
 
     setSubmitting(true);
 
+    // Block if profile incomplete
+    if (!isProfileComplete) {
+      showToast("Complete your profile to continue", "error");
+      window.location.replace("/profile");
+      return;
+    }
     try {
       const res = await fetch("http://localhost:5000/api/blood/request", {
         method: "POST",

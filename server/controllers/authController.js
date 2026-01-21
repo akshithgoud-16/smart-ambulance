@@ -275,6 +275,19 @@ const resetPassword = async (req, res) => {
   }
 };
 
+// Logout
+const logout = async (req, res) => {
+  try {
+    console.log("Logout request from user:", req.user?._id);
+    // Clear the JWT token by instructing client to remove it
+    // Also clear any session data if using sessions
+    return res.json({ message: "Logged out successfully" });
+  } catch (err) {
+    console.error("Logout error:", err);
+    return res.status(500).json({ message: "Unable to logout" });
+  }
+};
+
 module.exports = {
   sendSignupOtp,
   verifySignupOtp,
@@ -282,4 +295,5 @@ module.exports = {
   login,
   forgotPassword,
   resetPassword,
+  logout,
 };

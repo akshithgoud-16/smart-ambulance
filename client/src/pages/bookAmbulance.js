@@ -8,6 +8,7 @@ import { createBooking, getBookingById, checkPendingBooking, cancelBooking } fro
 import { calculateETA } from "../services/locationService";
 import { SearchingOverlay, DriverPanel } from "../components/BookingStatus";
 import "../styles/bookAmbulance.css";
+import { useProfileCompletion } from "../hooks/useProfileCompletion";
 
 function BookAmbulance({ showToast }) {
   // Booking state
@@ -31,6 +32,9 @@ function BookAmbulance({ showToast }) {
   const driverLocationPollingRef = useRef(null);
   const navigate = useNavigate();
   const routerLocation = useRouterLocation();
+
+  // Profile completion status
+  const { isProfileComplete } = useProfileCompletion(!!localStorage.getItem("token"));
 
   // Stable refs for passing latest callbacks into the map listener
   const handleMapClickRef = useRef(null);
@@ -330,6 +334,13 @@ useEffect(() => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Block if profile incomplete
+    if (!isProfileComplete) {
+      showToast("Complete your profile to continue", "error");
+      navigate("/profile");
+      return;
+    }
 
     if (!mapManagerRef.current) {
       showToast("⚠ Map is not ready yet. Please wait a moment.", "error");
