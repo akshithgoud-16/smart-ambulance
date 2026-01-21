@@ -1,3 +1,36 @@
+.small-otp-btn {
+  padding: 0.3rem 0.7rem !important;
+  font-size: 0.85rem !important;
+  height: 32px !important;
+  min-width: 0 !important;
+  margin-left: 6px !important;
+}
+.signup-otp-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.signup-otp-row .otp-btn {
+  height: 38px;
+  white-space: nowrap;
+  margin-top: 0;
+}
+.signup-form-custom .signup-input {
+  font-size: 0.98rem;
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.signup-form-custom .form-group {
+  margin-bottom: 1.1rem;
+}
+
+.signup-form-custom select.signup-input {
+  padding-right: 2rem;
+}
 /* General background animation */
 .auth-page {
   min-height: 100vh;
