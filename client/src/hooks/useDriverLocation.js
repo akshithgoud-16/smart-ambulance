@@ -33,7 +33,6 @@ export const useDriverLocation = (driverId, showToast) => {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ lat: latitude, lng: longitude }),
-            credentials: "include",
           });
 
           // Emit to socket for real-time updates
@@ -74,11 +73,10 @@ export const useDriverLocation = (driverId, showToast) => {
   // Update driver's on-duty status
   const updateOnDutyStatus = async (onDuty) => {
     try {
-      await fetch("/api/users/driver/on-duty", {
+      await fetch("/api/users/duty", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ onDuty }),
-        credentials: "include",
       });
     } catch (error) {
       console.error("Failed to update on-duty status:", error);

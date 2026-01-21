@@ -16,24 +16,15 @@ function Navbar({ isLoggedIn, setIsLoggedIn }) {
   }, [isLoggedIn]);
 
   const handleLogout = async () => {
-    try {
-      // Call server logout endpoint
-      await fetch("/api/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-    } catch (err) {
-      console.error("Logout error:", err);
-    } finally {
-      // Clear local storage and state regardless of server response
-      localStorage.removeItem("isLoggedIn");
-      localStorage.removeItem("role");
-      localStorage.removeItem("username");
-      localStorage.removeItem("userId");
-      setIsLoggedIn(false);
-      navigate("/auth");
-      setOpen(false);
-    }
+    // Clear local storage and state
+    localStorage.removeItem("token");
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("role");
+    localStorage.removeItem("username");
+    localStorage.removeItem("userId");
+    setIsLoggedIn(false);
+    navigate("/auth");
+    setOpen(false);
   };
 
   useEffect(() => {

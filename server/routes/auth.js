@@ -1,64 +1,25 @@
-const express = require('express');
-const passport = require('passport');
-const User = require('../models/User');
+const express = require("express");
+const {
+  sendSignupOtp,
+  verifySignupOtp,
+  setSignupPassword,
+  login,
+  forgotPassword,
+  resetPassword,
+} = require("../controllers/authController");
+
 const router = express.Router();
 
-// Signup
-router.post('/signup', async (req, res) => {
-  try {
-    const { username, email, password, role } = req.body;
-    const user = new User({ username, email, role });
-    const registeredUser = await User.register(user, password);
+// Signup flows
+router.post("/signup/send-otp", sendSignupOtp);
+router.post("/signup/verify-otp", verifySignupOtp);
+router.post("/signup/set-password", setSignupPassword);
 
-    // Auto-login after signup
-    req.login(registeredUser, (err) => {
-      if (err) return res.status(500).json({ message: 'Login failed after signup' });
-      res.json({ 
-        message: 'Signup successful', 
-        user: {
-          _id: registeredUser._id,
-          username: registeredUser.username,
-          email: registeredUser.email,
-          role: registeredUser.role,
-          bloodGroup: registeredUser.bloodGroup,
-        }
-      });
-    });
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
+// Login
+router.post("/login", login);
 
-// Login with username
-router.post('/login', (req, res, next) => {
-  passport.authenticate('local', (err, user, info) => {
-    if (err) return next(err);
-    if (!user) return res.status(400).json({ message: 'Invalid username or password' });
-
-    req.login(user, (err) => {
-      if (err) return next(err);
-      res.json({
-        message: 'Login successful',
-        user: {
-          _id: user._id,
-          username: user.username,
-          email: user.email,
-          role: user.role,
-          bloodGroup: user.bloodGroup,
-        },
-      });
-    });
-  })(req, res, next);
-});
-
-// Logout
-router.post('/logout', (req, res) => {
-  req.logout(() => {
-    req.session.destroy(() => {
-      res.clearCookie('sid');
-      res.json({ message: 'Logged out successfully' });
-    });
-  });
-});
+// Forgot / reset password
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password/:token", resetPassword);
 
 module.exports = router;

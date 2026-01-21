@@ -2,7 +2,8 @@
 import { Navigate } from "react-router-dom";
 
 export default function ProtectedRoute({ children, allowedRoles }) {
-  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+  const token = localStorage.getItem("token");
+  const isLoggedIn = !!token;
   const role = localStorage.getItem("role");
 
   if (!isLoggedIn) {

@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const passportLocalMongoose = require("passport-local-mongoose");
 
 const LocationSchema = new mongoose.Schema(
   {
@@ -15,12 +14,15 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    lowercase: true,
+    trim: true,
   },
   username: {
     type: String,
-    required: true,
-    unique: true,
+    trim: true,
   },
+  password: { type: String, select: false },
+  isVerified: { type: Boolean, default: false },
   role: {
     type: String,
     enum: ["user", "driver", "police"],
@@ -37,8 +39,15 @@ const UserSchema = new mongoose.Schema({
   profilePhoto: { type: String }, // data URL or remote URL
   currentLocation: LocationSchema,
   onDuty: { type: Boolean, default: false },
+  resetPasswordToken: { type: String, select: false },
+  resetPasswordExpire: { type: Date, select: false },
 });
 
-UserSchema.plugin(passportLocalMongoose);
+UserSchema.pre("save", function (next) {
+  if (!this.username) {
+    this.username = this.email;
+  }
+  next();
+});
 
 module.exports = mongoose.model("User", UserSchema);

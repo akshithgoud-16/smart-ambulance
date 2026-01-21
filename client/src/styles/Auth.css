@@ -73,6 +73,11 @@
   transition: all 0.3s ease;
 }
 
+.toggle-btn.active {
+  background: #fff;
+  color: #415a77;
+}
+
 .toggle-btn:hover {
   background: rgba(255,255,255,0.5);
   transform: scale(1.05);
@@ -170,6 +175,73 @@ select.form-control {
 .btn-primary:hover {
   transform: scale(1.05);
   box-shadow: 0 10px 20px rgba(255,255,255,0.4);
+}
+
+.btn-secondary {
+  width: 100%;
+  padding: 0.8rem 0;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.35);
+}
+
+.auth-switches {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+.stepper {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  color: #fff;
+  flex-wrap: wrap;
+}
+
+.step {
+  padding: 0.35rem 0.75rem;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.15);
+  font-weight: 600;
+}
+
+.step.active {
+  background: #aec3b0;
+  color: #1b263b;
+}
+
+.hint {
+  color: #e8f0ff;
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+}
+
+.action-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.text-success {
+  color: #a6f4c5;
+  font-weight: 600;
+}
+
+.text-danger {
+  color: #ffd6d6;
+  font-weight: 600;
 }
 
 /* Responsive */

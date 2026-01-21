@@ -32,7 +32,7 @@ router.put("/driver/location", isAuthenticated, isDriver, async (req, res) => {
         },
       },
       { new: true, runValidators: true }
-    ).select("-hash -salt");
+    ).select("-password -resetPasswordToken -resetPasswordExpire");
 
     if (!user) return res.status(404).json({ message: "User not found" });
 

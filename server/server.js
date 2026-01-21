@@ -1,9 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const session = require("express-session");
-const MongoStore = require("connect-mongo");
-const passport = require("passport");
 const path = require("path");
 require("dotenv").config({ path: path.join(__dirname, ".env") });
 
@@ -42,61 +39,12 @@ app.use(
 // Connect to MongoDB Atlas
 connectDB();
 
-// Session setup
-const isProd = process.env.NODE_ENV === "production";
-const mongoUri = process.env.MONGODB_URI;
-
-if (!mongoUri) {
-  console.error("Missing MONGODB_URI. Check server/.env.");
-  process.exit(1);
-}
-
-app.set("trust proxy", 1);
-
-app.use(
-  session({
-    name: "sid",
-    secret: process.env.SESSION_SECRET || "secretKey",
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({
-      mongoUrl: mongoUri,
-      ttl: 60 * 60 * 24,
-      autoRemove: "native",
-    }),
-    cookie: {
-      httpOnly: true,
-      sameSite: isProd ? "none" : "lax",
-      secure: isProd,
-      maxAge: 24 * 60 * 60 * 1000,
-    },
-  })
-);
-
-// Passport setup
-const User = require("./models/User");
-app.use(passport.initialize());
-app.use(passport.session());
-
-passport.use(User.createStrategy());
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
-
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/police", policeRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/blood", bloodRoutes);
-
-// Example protected route
-app.get("/api/profile", (req, res) => {
-  if (req.isAuthenticated()) {
-    res.json({ user: req.user });
-  } else {
-    res.status(401).json({ message: "Unauthorized" });
-  }
-});
 
 // Error handling middleware
 app.use(notFound);

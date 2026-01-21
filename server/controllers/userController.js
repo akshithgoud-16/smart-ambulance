@@ -21,7 +21,7 @@ const setDriverDutyStatus = async (req, res) => {
       req.user._id,
       { onDuty },
       { new: true, runValidators: true }
-    ).select("-hash -salt");
+    ).select("-password -resetPasswordToken -resetPasswordExpire");
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -38,7 +38,9 @@ const setDriverDutyStatus = async (req, res) => {
 // ✅ Get user profile
 const getUserProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select("-hash -salt");
+    const user = await User.findById(req.user._id).select(
+      "-password -resetPasswordToken -resetPasswordExpire"
+    );
     if (!user) return res.status(404).json({ message: "User not found" });
     res.json(user);
   } catch (err) {
@@ -135,7 +137,7 @@ const updateUserProfile = async (req, res) => {
     const user = await User.findByIdAndUpdate(req.user._id, updates, {
       new: true,
       runValidators: true,
-    }).select("-hash -salt");
+    }).select("-password -resetPasswordToken -resetPasswordExpire");
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
