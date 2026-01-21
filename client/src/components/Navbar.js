@@ -9,6 +9,7 @@ function Navbar({ isLoggedIn, setIsLoggedIn }) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
   const [role, setRole] = useState("user");
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
     const storedRole = localStorage.getItem("role") || "user";
@@ -67,19 +68,20 @@ function Navbar({ isLoggedIn, setIsLoggedIn }) {
           <span className="navbar-title">Smart Ambulance</span>
         </Link>
 
+        {/* Hamburger toggler, right-aligned */}
         <button
-          className="navbar-toggler"
+          className={`navbar-toggler custom-hamburger${drawerOpen ? " open" : ""}`}
           type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
           aria-label="Toggle navigation"
+          onClick={() => setDrawerOpen(!drawerOpen)}
         >
-          <span className="navbar-toggler-icon"></span>
+          <span className="bar"></span>
+          <span className="bar"></span>
+          <span className="bar"></span>
         </button>
 
-        <div className="collapse navbar-collapse justify-content-end" id="navbarNav">
+        {/* Desktop nav */}
+        <div className="collapse navbar-collapse justify-content-end d-none d-lg-flex" id="navbarNav">
           <ul className="navbar-nav align-items-lg-center">
             {roleLinks.map((link) => (
               <li className="nav-item" key={link.name}>
@@ -88,7 +90,6 @@ function Navbar({ isLoggedIn, setIsLoggedIn }) {
                 </Link>
               </li>
             ))}
-
             {!isLoggedIn ? (
               <li className="nav-item ms-lg-4 mt-2 mt-lg-0">
                 <Link className="btn btn-light btn-signup" to="/auth">
@@ -105,9 +106,45 @@ function Navbar({ isLoggedIn, setIsLoggedIn }) {
                   onClick={() => setOpen(!open)}
                 ></i>
                 <div
-                  className={`dropdown-menu position-absolute end-0 mt-2 ${
-                    open ? "show" : ""
-                  }`}
+                  className={`dropdown-menu position-absolute end-0 mt-2 ${open ? "show" : ""}`}
+                >
+                  <span className="dropdown-item-text">Role: {role}</span>
+                  <button className="dropdown-item logout-btn" onClick={handleLogout}>
+                    Logout <i className="bi bi-box-arrow-right logout-icon"></i>
+                  </button>
+                </div>
+              </li>
+            )}
+          </ul>
+        </div>
+
+        {/* Mobile drawer nav */}
+        <div className={`mobile-drawer${drawerOpen ? " open" : ""}`}>
+          <ul className="navbar-nav align-items-lg-center">
+            {roleLinks.map((link) => (
+              <li className="nav-item" key={link.name}>
+                <Link className="nav-link" to={link.path} onClick={() => setDrawerOpen(false)}>
+                  {link.name}
+                </Link>
+              </li>
+            ))}
+            {!isLoggedIn ? (
+              <li className="nav-item ms-lg-4 mt-2 mt-lg-0">
+                <Link className="btn btn-light btn-signup" to="/auth" onClick={() => setDrawerOpen(false)}>
+                  Login / Sign Up
+                </Link>
+              </li>
+            ) : (
+              <li
+                className="nav-item ms-lg-4 mt-2 mt-lg-0 position-relative"
+                ref={dropdownRef}
+              >
+                <i
+                  className="bi bi-person-circle user-icon"
+                  onClick={() => setOpen(!open)}
+                ></i>
+                <div
+                  className={`dropdown-menu position-absolute end-0 mt-2 ${open ? "show" : ""}`}
                 >
                   <span className="dropdown-item-text">Role: {role}</span>
                   <button className="dropdown-item logout-btn" onClick={handleLogout}>
