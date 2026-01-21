@@ -26,6 +26,7 @@ import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Toast from "./components/Toast";
 import "./styles/toast.css"; // Import toast styles globally
+import Footer from "./components/Footer";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -131,6 +132,7 @@ function App() {
           />
         ))}
       </div>
+      <Footer />
     </Router>
   );
 }
