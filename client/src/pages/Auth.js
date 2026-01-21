@@ -13,7 +13,6 @@ function Auth({ setIsLoggedIn }) {
   const [signupOtp, setSignupOtp] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [signupRole, setSignupRole] = useState("user");
-  const [signupStep, setSignupStep] = useState(1);
 
   const [forgotEmail, setForgotEmail] = useState("");
 
@@ -90,63 +89,7 @@ function Auth({ setIsLoggedIn }) {
         return;
       }
 
-      setSignupStep(2);
       setInfo("OTP sent to your email. It expires in 5 minutes.");
-    } catch (err) {
-      console.error(err);
-      setError("Server error. Try again later.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault();
-    resetMessages();
-    setLoading(true);
-
-    try {
-      const res = await fetch("/api/auth/signup/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: signupEmail, otp: signupOtp }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.message || "OTP verification failed");
-        return;
-      }
-
-      setSignupStep(3);
-      setInfo("OTP verified. You can now set your password.");
-    } catch (err) {
-      console.error(err);
-      setError("Server error. Try again later.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSetPassword = async (e) => {
-    e.preventDefault();
-    resetMessages();
-    setLoading(true);
-
-    try {
-      const res = await fetch("/api/auth/signup/set-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: signupEmail, password: signupPassword, role: signupRole }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.message || "Failed to set password");
-        return;
-      }
-
-      persistSession(data);
     } catch (err) {
       console.error(err);
       setError("Server error. Try again later.");
@@ -185,7 +128,6 @@ function Auth({ setIsLoggedIn }) {
     setInfo("");
     setLoading(false);
     if (nextMode !== "signup") {
-      setSignupStep(1);
       setSignupOtp("");
       setSignupPassword("");
     }
