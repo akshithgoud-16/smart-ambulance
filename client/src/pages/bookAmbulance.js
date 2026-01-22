@@ -337,8 +337,7 @@ useEffect(() => {
 
     // Block if profile incomplete
     if (!isProfileComplete) {
-      showToast("Complete your profile to continue", "error");
-      navigate("/profile");
+      navigate("/profile", { state: { requireProfileCompletion: true } });
       return;
     }
 

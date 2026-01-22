@@ -1,6 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import PopupModal from "../components/PopupModal";
 
 function UserProfile({ showToast }) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [showProfilePopup, setShowProfilePopup] = useState(false);
+    // Show popup if redirected from Book Now due to incomplete profile
+    useEffect(() => {
+      if (location.state && location.state.requireProfileCompletion) {
+        setShowProfilePopup(true);
+        // Clean up state so popup doesn't show on refresh
+        navigate(location.pathname, { replace: true, state: {} });
+      }
+    }, [location, navigate]);
   const [form, setForm] = useState({
     displayName: "",
     mobile: "",
@@ -134,6 +147,11 @@ function UserProfile({ showToast }) {
 
   return (
     <div className="police-profile-page">
+      <PopupModal
+        open={showProfilePopup}
+        message="Please fill your details to continue booking."
+        onClose={() => setShowProfilePopup(false)}
+      />
       <div className="profile-header">
         <div>
           <p>Update your personal details for better service.</p>
