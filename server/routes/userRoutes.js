@@ -22,6 +22,16 @@ router.put("/driver/location", isAuthenticated, isDriver, async (req, res) => {
       return res.status(400).json({ message: "Invalid coordinates" });
     }
 
+    const driver = await User.findById(req.user._id).select("onDuty");
+
+    if (!driver) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!driver.onDuty) {
+      return res.json({ message: "Driver is off duty; location not stored" });
+    }
+
     const user = await User.findByIdAndUpdate(
       req.user._id,
       {

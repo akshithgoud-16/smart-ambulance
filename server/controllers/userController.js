@@ -17,9 +17,14 @@ const setDriverDutyStatus = async (req, res) => {
       }
     }
 
+    const updates = { onDuty };
+    if (!onDuty) {
+      updates.currentLocation = null;
+    }
+
     const user = await User.findByIdAndUpdate(
       req.user._id,
-      { onDuty },
+      updates,
       { new: true, runValidators: true }
     ).select("-password -resetPasswordToken -resetPasswordExpire");
 

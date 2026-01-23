@@ -6,38 +6,92 @@
 const User = require("../models/User");
 const Booking = require("../models/Booking");
 
+const LOCATION_TIMEOUT_MS = 60 * 1000; // mark unavailable after 60 seconds of silence
+
 /**
  * Setup socket handlers for the application
  * @param {Server} io - Socket.IO server instance
  */
 const setupSocketHandlers = (io) => {
-  // Track active driver locations
+  // Track active driver locations and health
   const driverLocations = new Map();
+  const driverTimeouts = new Map();
+  const driverDutyCache = new Map();
+
+  const clearLocationTimeout = (driverId) => {
+    const timer = driverTimeouts.get(driverId);
+    if (timer) clearTimeout(timer);
+    driverTimeouts.delete(driverId);
+  };
+
+  const markDriverUnavailable = async (driverId, reason = "") => {
+    clearLocationTimeout(driverId);
+    driverLocations.delete(driverId);
+    driverDutyCache.set(driverId, false);
+
+    try {
+      await User.findByIdAndUpdate(driverId, { onDuty: false, currentLocation: null });
+      console.warn(`Driver ${driverId} marked unavailable${reason ? `: ${reason}` : ""}`);
+    } catch (err) {
+      console.error("Error marking driver unavailable:", err);
+    }
+  };
+
+  const scheduleLocationTimeout = (driverId) => {
+    clearLocationTimeout(driverId);
+    const timerId = setTimeout(() => {
+      markDriverUnavailable(driverId, "no location updates");
+    }, LOCATION_TIMEOUT_MS);
+    driverTimeouts.set(driverId, timerId);
+  };
+
+  const ensureDriverOnDuty = async (driverId) => {
+    if (!driverId) return false;
+    if (driverDutyCache.has(driverId)) {
+      return driverDutyCache.get(driverId);
+    }
+
+    const driver = await User.findById(driverId).select("onDuty");
+    const isOnDuty = !!driver?.onDuty;
+    driverDutyCache.set(driverId, isOnDuty);
+    return isOnDuty;
+  };
 
   io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
 
-    // Driver updates their location
-    socket.on("driver:location:update", async (data) => {
+    // Driver updates their location (only while on duty)
+    socket.on("driver:locationUpdate", async (data) => {
       try {
-        const { driverId, lat, lng } = data;
+        const { driverId, lat, lng } = data || {};
 
-        // Update driver location in database
+        if (!driverId || typeof lat !== "number" || typeof lng !== "number") {
+          socket.emit("error", { message: "Invalid location payload" });
+          return;
+        }
+
+        const isOnDuty = await ensureDriverOnDuty(driverId);
+        if (!isOnDuty) {
+          console.warn(`Ignoring location from off-duty driver ${driverId}`);
+          return;
+        }
+
         await User.findByIdAndUpdate(
           driverId,
           {
-            "currentLocation.lat": lat,
-            "currentLocation.lng": lng,
-            "currentLocation.updatedAt": new Date(),
+            currentLocation: {
+              lat,
+              lng,
+              updatedAt: new Date(),
+            },
           },
           { new: true }
         );
 
-        // Store in memory for quick access
         driverLocations.set(driverId, { lat, lng, timestamp: Date.now() });
+        scheduleLocationTimeout(driverId);
 
-        // Broadcast driver location to all connected clients (for live tracking)
-        socket.broadcast.emit("driver:location:update", {
+        socket.broadcast.emit("driver:locationUpdate", {
           driverId,
           lat,
           lng,
@@ -52,19 +106,22 @@ const setupSocketHandlers = (io) => {
     });
 
     // Driver goes on duty
-    socket.on("driver:on-duty", async (data) => {
+    socket.on("driver:onDuty", async (data) => {
       try {
-        const { driverId } = data;
-        await User.findByIdAndUpdate(
-          driverId,
-          { onDuty: true },
-          { new: true }
-        );
-        
-        socket.emit("driver:on-duty:success", { 
-          message: "You are now on duty" 
+        const { driverId } = data || {};
+        if (!driverId) {
+          socket.emit("error", { message: "driverId is required" });
+          return;
+        }
+
+        await User.findByIdAndUpdate(driverId, { onDuty: true }, { new: true });
+        driverDutyCache.set(driverId, true);
+        scheduleLocationTimeout(driverId);
+
+        socket.emit("driver:onDuty:success", {
+          message: "You are now on duty",
         });
-        
+
         console.log(`Driver ${driverId} is now on duty`);
       } catch (error) {
         console.error("Error updating driver status:", error);
@@ -73,19 +130,20 @@ const setupSocketHandlers = (io) => {
     });
 
     // Driver goes off duty
-    socket.on("driver:off-duty", async (data) => {
+    socket.on("driver:offDuty", async (data) => {
       try {
-        const { driverId } = data;
-        await User.findByIdAndUpdate(
-          driverId,
-          { onDuty: false },
-          { new: true }
-        );
-        
-        socket.emit("driver:off-duty:success", { 
-          message: "You are now off duty" 
+        const { driverId } = data || {};
+        if (!driverId) {
+          socket.emit("error", { message: "driverId is required" });
+          return;
+        }
+
+        await markDriverUnavailable(driverId, "driver toggled off duty");
+
+        socket.emit("driver:offDuty:success", {
+          message: "You are now off duty",
         });
-        
+
         console.log(`Driver ${driverId} is now off duty`);
       } catch (error) {
         console.error("Error updating driver status:", error);

@@ -30,6 +30,8 @@ const DriverDashboard = ({ showToast }) => {
   const driverToPickupRenderer = useRef(null);
   const pickupToDestRenderer = useRef(null);
   const trackingInterval = useRef(null);
+  const locationWatchId = useRef(null);
+  const dutySessionActive = useRef(false);
   const navigate = useNavigate();
 
   // Check if all required profile fields are filled
@@ -96,6 +98,66 @@ const DriverDashboard = ({ showToast }) => {
     const interval = setInterval(fetchBookings, 5000);
     return () => clearInterval(interval);
   }, [onDuty, showToast, dismissedBookings]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const resumeTrackingIfNeeded = async () => {
+      if (!onDuty) {
+        const wasOnDutySession = dutySessionActive.current;
+
+        if (locationWatchId.current !== null) {
+          stopOnDutyTracking();
+        }
+
+        if (wasOnDutySession && driverProfile?._id) {
+          const socket = getSocket();
+          socket.emit("driver:offDuty", { driverId: driverProfile._id });
+        }
+
+        dutySessionActive.current = false;
+        return;
+      }
+
+      if (locationWatchId.current !== null) return;
+
+      const permission = await requestLocationPermission();
+
+      if (!permission.granted) {
+        if (!cancelled) {
+          setOnDuty(false);
+          try {
+            await fetch("http://localhost:5000/api/users/duty", {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({ onDuty: false }),
+            });
+          } catch (err) {
+            console.error("Failed to sync off-duty state after permission denial:", err);
+          }
+          showToast("Location permission is required to stay on duty", "error");
+        }
+        return;
+      }
+
+      if (cancelled) return;
+
+      if (driverProfile?._id) {
+        const socket = getSocket();
+        socket.emit("driver:onDuty", { driverId: driverProfile._id });
+      }
+
+      dutySessionActive.current = true;
+      startOnDutyTracking(permission.position);
+    };
+
+    resumeTrackingIfNeeded();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [onDuty, driverProfile, showToast]);
 
   // Initialize Google Map when active booking exists
   useEffect(() => {
@@ -407,9 +469,93 @@ const DriverDashboard = ({ showToast }) => {
     }
   };
 
+  const requestLocationPermission = () => {
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) {
+        resolve({ granted: false, error: new Error("Geolocation is not supported") });
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => resolve({ granted: true, position }),
+        (error) => resolve({ granted: false, error }),
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    });
+  };
+
+  const stopOnDutyTracking = () => {
+    if (locationWatchId.current !== null) {
+      navigator.geolocation.clearWatch(locationWatchId.current);
+      locationWatchId.current = null;
+    }
+  };
+
+  const startOnDutyTracking = (initialPosition) => {
+    if (!navigator.geolocation) {
+      showToast("Geolocation is not supported", "error");
+      return;
+    }
+
+    stopOnDutyTracking();
+    const socket = getSocket();
+
+    const emitLocation = (coords) => {
+      if (!driverProfile?._id || !onDuty) return;
+      socket.emit("driver:locationUpdate", {
+        driverId: driverProfile._id,
+        lat: coords.lat,
+        lng: coords.lng,
+      });
+    };
+
+    const pushLocation = async (coords) => {
+      setDriverLocation(coords);
+      emitLocation(coords);
+
+      // Persist location for pending bookings proximity filters
+      if (onDuty) {
+        try {
+          await fetch("/api/users/driver/location", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ lat: coords.lat, lng: coords.lng }),
+          });
+        } catch (err) {
+          console.error("Failed to persist driver location:", err);
+        }
+      }
+    };
+
+    if (initialPosition?.coords) {
+      pushLocation({
+        lat: initialPosition.coords.latitude,
+        lng: initialPosition.coords.longitude,
+      });
+    }
+
+    dutySessionActive.current = true;
+    locationWatchId.current = navigator.geolocation.watchPosition(
+      (pos) => {
+        pushLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      },
+      (error) => {
+        console.error("Geolocation watch error:", error);
+        showToast("Unable to track location. Please enable location services.", "error");
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 10000,
+      }
+    );
+  };
+
   const handleDutyToggle = async () => {
     try {
       const newStatus = !onDuty;
+      let permissionResult = null;
       
       // Check if profile is complete before turning on duty
       if (newStatus) {
@@ -417,6 +563,18 @@ const DriverDashboard = ({ showToast }) => {
           setProfileError("Please fill all the details in your profile");
           // Auto-clear error after 5 seconds
           setTimeout(() => setProfileError(""), 5000);
+          return;
+        }
+
+        permissionResult = await requestLocationPermission();
+
+        if (!permissionResult.granted) {
+          const permissionMessage = permissionResult.error?.code === 1
+            ? "Location permission denied. Please enable location to go on duty."
+            : "Unable to access location. Please enable location services.";
+
+          setOnDuty(false);
+          showToast(permissionMessage, "error");
           return;
         }
       }
@@ -431,15 +589,33 @@ const DriverDashboard = ({ showToast }) => {
         body: JSON.stringify({ onDuty: newStatus }),
       });
 
-      if (res.ok) {
-        setOnDuty(newStatus);
-        showToast(newStatus ? "✅ You are now on duty" : "⚠️ You are now off duty", "success");
-        if (!newStatus) {
-          setPendingBookings([]);
-        }
-      } else {
-        const data = await res.json();
+      const data = await res.json();
+
+      if (!res.ok) {
         showToast(data.message || "Failed to update duty status", "error");
+        return;
+      }
+
+      setOnDuty(newStatus);
+
+      if (newStatus) {
+        const socket = getSocket();
+        if (driverProfile?._id) {
+          socket.emit("driver:onDuty", { driverId: driverProfile._id });
+        }
+        dutySessionActive.current = true;
+        startOnDutyTracking(permissionResult?.position);
+        showToast("✅ You are now on duty", "success");
+      } else {
+        const wasOnDutySession = dutySessionActive.current;
+        stopOnDutyTracking();
+        if (wasOnDutySession && driverProfile?._id) {
+          const socket = getSocket();
+          socket.emit("driver:offDuty", { driverId: driverProfile._id });
+        }
+        dutySessionActive.current = false;
+        setPendingBookings([]);
+        showToast("⚠️ You are now off duty", "success");
       }
     } catch (err) {
       console.error(err);
@@ -550,6 +726,13 @@ const DriverDashboard = ({ showToast }) => {
       setIsCancelling(false);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      stopOnDutyTracking();
+      dutySessionActive.current = false;
+    };
+  }, []);
 
   return (
     <div className="driver-dashboard">

@@ -37,7 +37,7 @@ export const useDriverLocation = (driverId, showToast) => {
 
           // Emit to socket for real-time updates
           const socket = getSocket();
-          socket.emit("driver:location:update", {
+          socket.emit("driver:locationUpdate", {
             driverId,
             lat: latitude,
             lng: longitude,

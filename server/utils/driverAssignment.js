@@ -22,6 +22,10 @@ const findNearbyDrivers = (allDrivers, pickupLat, pickupLng, radiusKm = 5) => {
 
   const nearbyDrivers = allDrivers
     .map((driver) => {
+      if (!driver.onDuty) {
+        return null;
+      }
+
       // Check if driver has current location
       if (!driver.currentLocation || !driver.currentLocation.lat || !driver.currentLocation.lng) {
         return null;
@@ -51,7 +55,7 @@ const findNearbyDrivers = (allDrivers, pickupLat, pickupLng, radiusKm = 5) => {
         eta, // in minutes
         currentLoad: driver.currentLoad || 0, // Number of active bookings
         rating: driver.rating || 4.5,
-        isAvailable: !driver.onDuty || driver.currentLoad === 0,
+        isAvailable: driver.onDuty && driver.currentLoad === 0,
       };
     })
     .filter((driver) => driver !== null); // Remove null entries
