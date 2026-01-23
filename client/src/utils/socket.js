@@ -5,7 +5,7 @@ let socketInstance = null;
 // Backend socket URL
 const SOCKET_URL =
   process.env.REACT_APP_SOCKET_URL ||
-  `${window.location.protocol}//${window.location.hostname}:5000`;
+  "https://smart-ambulance-w3i0.onrender.com";
 
 /**
  * Get or create socket instance
