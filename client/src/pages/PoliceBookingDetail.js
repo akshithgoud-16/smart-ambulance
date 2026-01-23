@@ -31,7 +31,7 @@ const PoliceBookingDetail = ({ showToast }) => {
     const fetchPoliceProfile = async () => {
       try {
         console.log("🚔 Fetching police profile for current location...");
-        const res = await fetch("http://localhost:5000/api/users/profile", {
+        const res = await fetch("/api/users/profile", {
           credentials: "include",
         });
         if (res.ok) {
@@ -64,7 +64,7 @@ const PoliceBookingDetail = ({ showToast }) => {
     const fetchBooking = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`http://localhost:5000/api/police/booking/${bookingId}`, {
+        const res = await fetch(`/api/police/booking/${bookingId}`, {
           credentials: "include",
         });
         

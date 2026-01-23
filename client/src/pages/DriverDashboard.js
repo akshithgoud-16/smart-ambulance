@@ -51,7 +51,7 @@ const DriverDashboard = ({ showToast }) => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/users/profile", { credentials: "include" });
+        const res = await fetch("/api/users/profile", { credentials: "include" });
         if (res.ok) {
           const data = await res.json();
           console.log("Fetched driver profile:", data);
@@ -127,7 +127,7 @@ const DriverDashboard = ({ showToast }) => {
         if (!cancelled) {
           setOnDuty(false);
           try {
-            await fetch("http://localhost:5000/api/users/duty", {
+            await fetch("/api/users/duty", {
               method: "PUT",
               headers: { "Content-Type": "application/json" },
               credentials: "include",
@@ -582,7 +582,7 @@ const DriverDashboard = ({ showToast }) => {
       // Clear any existing error
       setProfileError("");
       
-      const res = await fetch("http://localhost:5000/api/users/duty", {
+      const res = await fetch("/api/users/duty", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

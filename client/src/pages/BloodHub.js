@@ -88,7 +88,7 @@ const BloodHub = ({ showToast }) => {
 
   const fetchMyRequests = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/blood/my-requests", {
+      const res = await fetch("/api/blood/my-requests", {
         credentials: "include",
       });
       const data = await res.json();
@@ -102,7 +102,7 @@ const BloodHub = ({ showToast }) => {
 
   const fetchMyDonations = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/blood/my-donations", {
+      const res = await fetch("/api/blood/my-donations", {
         credentials: "include",
       });
       const data = await res.json();
@@ -116,7 +116,7 @@ const BloodHub = ({ showToast }) => {
 
   const fetchPendingRequests = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/blood/pending", {
+      const res = await fetch("/api/blood/pending", {
         credentials: "include",
       });
       const data = await res.json();
@@ -150,7 +150,7 @@ const BloodHub = ({ showToast }) => {
       return;
     }
     try {
-      const res = await fetch("http://localhost:5000/api/blood/request", {
+      const res = await fetch("/api/blood/request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -184,7 +184,7 @@ const BloodHub = ({ showToast }) => {
 
   const handleAcceptRequest = async (requestId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/blood/accept/${requestId}`, {
+      const res = await fetch(`/api/blood/accept/${requestId}`, {
         method: "PUT",
         credentials: "include",
       });
@@ -205,7 +205,7 @@ const BloodHub = ({ showToast }) => {
 
   const handleCompleteRequest = async (requestId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/blood/complete/${requestId}`, {
+      const res = await fetch(`/api/blood/complete/${requestId}`, {
         method: "PUT",
         credentials: "include",
       });
@@ -228,7 +228,7 @@ const BloodHub = ({ showToast }) => {
     if (!window.confirm("Are you sure you want to cancel this request?")) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/blood/cancel/${requestId}`, {
+      const res = await fetch(`/api/blood/cancel/${requestId}`, {
         method: "PUT",
         credentials: "include",
       });
@@ -286,7 +286,7 @@ const BloodHub = ({ showToast }) => {
       // Try to get bloodGroup from profile API
       let bloodGroup = null;
       try {
-        const res = await fetch("http://localhost:5000/api/users/profile", { credentials: "include" });
+        const res = await fetch("/api/users/profile", { credentials: "include" });
         const data = await res.json();
         if (res.ok && data.bloodGroup) bloodGroup = data.bloodGroup;
       } catch {}

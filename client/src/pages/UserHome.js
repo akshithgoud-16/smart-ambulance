@@ -47,7 +47,7 @@ const Home = ({ showToast }) => {
       // Try to get bloodGroup from profile API
       let bloodGroup = null;
       try {
-        const res = await fetch("http://localhost:5000/api/users/profile", { credentials: "include" });
+        const res = await fetch("/api/users/profile", { credentials: "include" });
         const data = await res.json();
         if (res.ok && data.bloodGroup) bloodGroup = data.bloodGroup;
       } catch {}
@@ -55,7 +55,7 @@ const Home = ({ showToast }) => {
       // Fetch pending requests
       let pending = [];
       try {
-        const res = await fetch("http://localhost:5000/api/blood/pending", { credentials: "include" });
+        const res = await fetch("/api/blood/pending", { credentials: "include" });
         const data = await res.json();
         if (res.ok && Array.isArray(data)) pending = data;
       } catch {}

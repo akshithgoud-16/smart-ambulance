@@ -4,9 +4,17 @@ export const bootstrapAuthFetch = () => {
   const originalFetch = window.fetch.bind(window);
   window.__authFetchInstalled = true;
 
+  const API_BASE_URL = "https://smart-ambulance-w3i0.onrender.com";
+
   window.fetch = async (input, init = {}) => {
-    const url = typeof input === "string" ? input : input?.url || "";
-    const isApiRequest = url.startsWith("/api") || url.startsWith("http://localhost:5000/api");
+    let url = typeof input === "string" ? input : input?.url || "";
+    const isApiRequest = url.startsWith("/api") || url.startsWith("http://localhost:5000/api") || url.startsWith(API_BASE_URL + "/api");
+
+    if (url.startsWith("/api")) {
+      url = API_BASE_URL + url;
+    } else if (url.startsWith("http://localhost:5000/api")) {
+      url = url.replace("http://localhost:5000", API_BASE_URL);
+    }
 
     if (!isApiRequest) {
       return originalFetch(input, init);
@@ -20,6 +28,6 @@ export const bootstrapAuthFetch = () => {
     }
 
     const updatedInit = { ...init, headers };
-    return originalFetch(input, updatedInit);
+    return originalFetch(url, updatedInit);
   };
 };

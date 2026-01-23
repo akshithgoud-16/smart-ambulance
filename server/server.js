@@ -18,7 +18,7 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: ["http://localhost:3000", "https://smart-ambulance-w3i0.onrender.com", "*"],
     credentials: true,
   },
 });
@@ -31,10 +31,14 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: ["http://localhost:3000", "https://smart-ambulance-w3i0.onrender.com", "*"],
     credentials: true,
   })
 );
+// Health check route
+app.get("/", (req, res) => {
+  res.status(200).json({ status: "ok", message: "Smart Ambulance backend is running." });
+});
 
 // Connect to MongoDB Atlas
 connectDB();

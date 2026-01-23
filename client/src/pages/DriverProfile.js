@@ -21,7 +21,7 @@ function DriverProfile({ showToast }) {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("http://localhost:5000/api/users/profile", {
+      const res = await fetch("/api/users/profile", {
         credentials: "include",
       });
       const data = await res.json();
@@ -79,7 +79,7 @@ function DriverProfile({ showToast }) {
     };
 
     try {
-      const res = await fetch("http://localhost:5000/api/users/profile", {
+      const res = await fetch("/api/users/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
