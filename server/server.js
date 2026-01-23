@@ -18,8 +18,10 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000", "https://smart-ambulance-w3i0.onrender.com", "*"],
+    origin: ["http://localhost:3000", "https://smart-ambulance-dun.vercel.app"],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   },
 });
 
@@ -31,8 +33,12 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://smart-ambulance-w3i0.onrender.com", "*"],
+    origin: ["http://localhost:3000", "https://smart-ambulance-dun.vercel.app"],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   })
 );
 // Health check route
