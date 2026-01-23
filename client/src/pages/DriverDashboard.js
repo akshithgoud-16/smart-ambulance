@@ -157,7 +157,7 @@ const DriverDashboard = ({ showToast }) => {
     return () => {
       cancelled = true;
     };
-  }, [onDuty, driverProfile, showToast]);
+  }, [onDuty, driverProfile, showToast, startOnDutyTracking]);
 
   // Initialize Google Map when active booking exists
   useEffect(() => {
