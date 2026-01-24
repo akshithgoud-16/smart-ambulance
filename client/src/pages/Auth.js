@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Auth.css";
 import { getSocket } from "../utils/socket";
+import { authFetch } from "../utils/api";
 
 function Auth({ setIsLoggedIn }) {
   const [mode, setMode] = useState("login"); // login | signup | forgot
@@ -51,21 +52,22 @@ function Auth({ setIsLoggedIn }) {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await authFetch("/api/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: loginEmail, password: loginPassword }),
       });
 
       const data = await res.json();
       if (!res.ok) {
+        console.error("[Auth] Login failed:", data.message);
         setError(data.message || "Invalid credentials");
         return;
       }
 
+      console.log("[Auth] Login successful");
       persistSession(data);
     } catch (err) {
-      console.error(err);
+      console.error("[Auth] Login network error:", err);
       setError("Server error. Try again later.");
     } finally {
       setLoading(false);
@@ -77,21 +79,22 @@ function Auth({ setIsLoggedIn }) {
     resetMessages();
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/signup/send-otp", {
+      const res = await authFetch("/api/auth/signup/send-otp", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: signupEmail }),
       });
 
       const data = await res.json();
       if (!res.ok) {
+        console.error("[Auth] Send OTP failed:", data.message);
         setError(data.message || "Unable to send OTP");
         return;
       }
 
+      console.log("[Auth] OTP sent successfully");
       setInfo("OTP sent to your email. It expires in 5 minutes.");
     } catch (err) {
-      console.error(err);
+      console.error("[Auth] Send OTP network error:", err);
       setError("Server error. Try again later.");
     } finally {
       setLoading(false);
@@ -103,19 +106,20 @@ function Auth({ setIsLoggedIn }) {
     resetMessages();
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/forgot-password", {
+      const res = await authFetch("/api/auth/forgot-password", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: forgotEmail }),
       });
       const data = await res.json();
       if (!res.ok) {
+        console.error("[Auth] Forgot password failed:", data.message);
         setError(data.message || "Unable to process request");
         return;
       }
+      console.log("[Auth] Forgot password email sent");
       setInfo(data.message || "If that email exists, a reset link has been sent.");
     } catch (err) {
-      console.error(err);
+      console.error("[Auth] Forgot password network error:", err);
       setError("Server error. Try again later.");
     } finally {
       setLoading(false);
@@ -201,38 +205,45 @@ function Auth({ setIsLoggedIn }) {
               resetMessages();
               setLoading(true);
               try {
-                // If OTP not verified, verify it first
+                // If OTP not entered, show error
                 if (!signupOtp) {
                   setError("Please enter OTP sent to your email.");
                   setLoading(false);
                   return;
                 }
-                // If OTP is not verified, verify it
-                const otpRes = await fetch("/api/auth/signup/verify-otp", {
+                
+                // Step 1: Verify OTP
+                console.log("[Auth] Verifying OTP...");
+                const otpRes = await authFetch("/api/auth/signup/verify-otp", {
                   method: "POST",
-                  headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ email: signupEmail, otp: signupOtp }),
                 });
                 const otpData = await otpRes.json();
                 if (!otpRes.ok) {
+                  console.error("[Auth] OTP verification failed:", otpData.message);
                   setError(otpData.message || "OTP verification failed");
                   setLoading(false);
                   return;
                 }
-                // Set password
-                const passRes = await fetch("/api/auth/signup/set-password", {
+                console.log("[Auth] OTP verified successfully");
+                
+                // Step 2: Set password
+                console.log("[Auth] Setting password...");
+                const passRes = await authFetch("/api/auth/signup/set-password", {
                   method: "POST",
-                  headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ email: signupEmail, password: signupPassword, role: signupRole }),
                 });
                 const passData = await passRes.json();
                 if (!passRes.ok) {
+                  console.error("[Auth] Password setup failed:", passData.message);
                   setError(passData.message || "Failed to set password");
                   setLoading(false);
                   return;
                 }
+                console.log("[Auth] Password set and login successful");
                 persistSession(passData);
               } catch (err) {
+                console.error("[Auth] Signup network error:", err);
                 setError("Server error. Try again later.");
               } finally {
                 setLoading(false);

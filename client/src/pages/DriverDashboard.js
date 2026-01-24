@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { joinBookingRoom, emitDriverLocation, onUserLocation, getSocket } from "../utils/socket";
 import { getAmbulanceIconUrl, getPoliceIconUrl } from "../utils/mapIcons";
@@ -69,7 +69,7 @@ const DriverDashboard = ({ showToast }) => {
     }
   };
 
-  const startOnDutyTracking = (initialPosition) => {
+  const startOnDutyTracking = useCallback((initialPosition) => {
     if (!navigator.geolocation) {
       showToast("Geolocation is not supported", "error");
       return;
@@ -128,7 +128,7 @@ const DriverDashboard = ({ showToast }) => {
         timeout: 10000,
       }
     );
-  };
+  }, [onDuty, driverProfile, showToast]);
 
   // Fetch driver profile to get current duty status
   useEffect(() => {
