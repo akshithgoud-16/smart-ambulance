@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import "../styles/Auth.css";
-import { authFetch } from "../utils/api";
 
 function ResetPassword() {
   const { token } = useParams();
@@ -27,22 +26,20 @@ function ResetPassword() {
 
     setLoading(true);
     try {
-      console.log("[ResetPassword] Submitting reset token:", token.substring(0, 10) + "...");
-      const res = await authFetch(`/api/auth/reset-password/${token}`, {
+      const res = await fetch(`/api/auth/reset-password/${token}`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),
       });
       const data = await res.json();
       if (!res.ok) {
-        console.error("[ResetPassword] Reset failed:", data.message);
         setError(data.message || "Unable to reset password");
         return;
       }
-      console.log("[ResetPassword] Password reset successful");
       setInfo("Password updated. You can login now.");
       setTimeout(() => navigate("/auth"), 1500);
     } catch (err) {
-      console.error("[ResetPassword] Network error:", err);
+      console.error(err);
       setError("Server error. Try again later.");
     } finally {
       setLoading(false);
