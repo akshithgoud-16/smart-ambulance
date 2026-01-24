@@ -16,9 +16,28 @@ const app = express();
 const http = require("http");
 const server = http.createServer(app);
 const { Server } = require("socket.io");
+
+// Get allowed origins from environment or use defaults
+const getAllowedOrigins = () => {
+  const origins = ["http://localhost:3000"];
+  if (process.env.FRONTEND_URL) {
+    origins.push(process.env.FRONTEND_URL);
+  }
+  if (process.env.VERCEL_FRONTEND_URL) {
+    origins.push(process.env.VERCEL_FRONTEND_URL);
+  }
+  // Keep hardcoded production domain as fallback
+  origins.push("https://smart-ambulance-dun.vercel.app");
+  // Remove duplicates
+  return [...new Set(origins)];
+};
+
+const allowedOrigins = getAllowedOrigins();
+console.log("Allowed CORS origins:", allowedOrigins);
+
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000", "https://smart-ambulance-dun.vercel.app"],
+    origin: allowedOrigins,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -33,7 +52,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://smart-ambulance-dun.vercel.app"],
+    origin: allowedOrigins,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],

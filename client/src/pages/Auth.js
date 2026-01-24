@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Auth.css";
 import { getSocket } from "../utils/socket";
-
+import { authFetch } from "../utils/api"; // adjust path if needed
 function Auth({ setIsLoggedIn }) {
   const [mode, setMode] = useState("login"); // login | signup | forgot
   const [loginEmail, setLoginEmail] = useState("");
@@ -51,9 +51,8 @@ function Auth({ setIsLoggedIn }) {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await authFetch("/api/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: loginEmail, password: loginPassword }),
       });
 
@@ -72,40 +71,42 @@ function Auth({ setIsLoggedIn }) {
     }
   };
 
-  const handleSendOtp = async (e) => {
-    e.preventDefault();
-    resetMessages();
-    setLoading(true);
-    try {
-      const res = await fetch("/api/auth/signup/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: signupEmail }),
-      });
 
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.message || "Unable to send OTP");
-        return;
-      }
+const handleSendOtp = async (e) => {
+  e.preventDefault();
+  resetMessages();
+  setLoading(true);
 
-      setInfo("OTP sent to your email. It expires in 5 minutes.");
-    } catch (err) {
-      console.error(err);
-      setError("Server error. Try again later.");
-    } finally {
-      setLoading(false);
+  try {
+    const res = await authFetch("/api/auth/signup/send-otp", {
+      method: "POST",
+      body: JSON.stringify({ email: signupEmail })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setError(data.message || "Unable to send OTP");
+      return;
     }
-  };
+
+    setInfo("OTP sent to your email. It expires in 5 minutes.");
+  } catch (err) {
+    console.error(err);
+    setError("Server error. Try again later.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleForgotPassword = async (e) => {
     e.preventDefault();
     resetMessages();
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/forgot-password", {
+      const res = await authFetch("/api/auth/forgot-password", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: forgotEmail }),
       });
       const data = await res.json();
@@ -208,9 +209,8 @@ function Auth({ setIsLoggedIn }) {
                   return;
                 }
                 // If OTP is not verified, verify it
-                const otpRes = await fetch("/api/auth/signup/verify-otp", {
+                const otpRes = await authFetch("/api/auth/signup/verify-otp", {
                   method: "POST",
-                  headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ email: signupEmail, otp: signupOtp }),
                 });
                 const otpData = await otpRes.json();
@@ -220,9 +220,8 @@ function Auth({ setIsLoggedIn }) {
                   return;
                 }
                 // Set password
-                const passRes = await fetch("/api/auth/signup/set-password", {
+                const passRes = await authFetch("/api/auth/signup/set-password", {
                   method: "POST",
-                  headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ email: signupEmail, password: signupPassword, role: signupRole }),
                 });
                 const passData = await passRes.json();
@@ -329,3 +328,5 @@ function Auth({ setIsLoggedIn }) {
 }
 
 export default Auth;
+
+

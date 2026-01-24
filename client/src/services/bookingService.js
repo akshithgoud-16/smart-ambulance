@@ -1,11 +1,10 @@
 // Booking service for API operations
+import { authFetch } from "../utils/api";
 
 export const createBooking = async (bookingData) => {
-  const res = await fetch("/api/bookings", {
+  const res = await authFetch("/api/bookings", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(bookingData),
-    credentials: "include",
   });
 
   if (!res.ok) {
@@ -20,9 +19,7 @@ export const createBooking = async (bookingData) => {
 };
 
 export const getBookingById = async (bookingId) => {
-  const res = await fetch(`/api/bookings/${bookingId}`, {
-    credentials: "include",
-  });
+  const res = await authFetch(`/api/bookings/${bookingId}`);
 
   if (!res.ok) {
     throw new Error("Unable to load booking details");
@@ -32,9 +29,7 @@ export const getBookingById = async (bookingId) => {
 };
 
 export const checkPendingBooking = async () => {
-  const res = await fetch("/api/bookings/pending-check", {
-    credentials: "include",
-  });
+  const res = await authFetch("/api/bookings/pending-check");
 
   if (!res.ok) {
     return { hasPendingBooking: false, booking: null };
@@ -42,11 +37,9 @@ export const checkPendingBooking = async () => {
 
   return await res.json();
 };
-
 export const cancelBooking = async (bookingId) => {
-  const res = await fetch(`/api/bookings/${bookingId}/cancel`, {
+  const res = await authFetch(`/api/bookings/${bookingId}/cancel`, {
     method: "PUT",
-    credentials: "include",
   });
 
   if (!res.ok) {

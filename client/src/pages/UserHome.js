@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/UserHome.css";
 import { getSocket } from "../utils/socket";
+import { authFetch } from "../utils/api";
 
 const Home = ({ showToast }) => {
   const navigate = useNavigate();
@@ -47,7 +48,7 @@ const Home = ({ showToast }) => {
       // Try to get bloodGroup from profile API
       let bloodGroup = null;
       try {
-        const res = await fetch("/api/users/profile", { credentials: "include" });
+        const res = await authFetch("/api/users/profile");
         const data = await res.json();
         if (res.ok && data.bloodGroup) bloodGroup = data.bloodGroup;
       } catch {}
@@ -55,7 +56,7 @@ const Home = ({ showToast }) => {
       // Fetch pending requests
       let pending = [];
       try {
-        const res = await fetch("/api/blood/pending", { credentials: "include" });
+        const res = await authFetch("/api/blood/pending");
         const data = await res.json();
         if (res.ok && Array.isArray(data)) pending = data;
       } catch {}

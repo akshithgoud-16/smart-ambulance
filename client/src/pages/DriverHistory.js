@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { authFetch } from "../utils/api";
 import "../styles/DriverHistory.css";
 
 const DriverHistory = ({ showToast }) => {
@@ -13,9 +14,7 @@ const DriverHistory = ({ showToast }) => {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const res = await fetch("/api/bookings/driver", {
-          credentials: "include",
-        });
+        const res = await authFetch("/api/bookings/driver");
         if (res.ok) {
           const data = await res.json();
           setBookings(data);

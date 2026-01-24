@@ -2,6 +2,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Toast from "../components/Toast";
+import { authFetch } from "../utils/api";
 import "../styles/MyBookings.css";
 
 function MyBookings({ showToast }) {
@@ -19,9 +20,7 @@ function MyBookings({ showToast }) {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const res = await fetch("/api/users/bookings", {
-          credentials: "include",
-        });
+        const res = await authFetch("/api/users/bookings");
         if (res.ok) {
           const data = await res.json();
           setBookings(data);
@@ -41,9 +40,8 @@ function MyBookings({ showToast }) {
   // Cancel booking
   const cancelBooking = async (bookingId) => {
     try {
-      const res = await fetch(`/api/users/bookings/${bookingId}/cancel`, {
+      const res = await authFetch(`/api/users/bookings/${bookingId}/cancel`, {
         method: "PUT",
-        credentials: "include",
       });
 
       if (res.ok) {

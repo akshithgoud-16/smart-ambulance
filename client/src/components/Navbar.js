@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import logo from "../assets/logo.png";
 import "../styles/Navbar.css";
 import { Link } from "react-router-dom";
+import { authFetch } from "../utils/api";
 
 function Navbar({ isLoggedIn, setIsLoggedIn }) {
   const [open, setOpen] = useState(false);
@@ -21,10 +22,8 @@ function Navbar({ isLoggedIn, setIsLoggedIn }) {
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/logout", {
+      await authFetch("/api/auth/logout", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
       });
     } catch (err) {
       console.error("Logout API error:", err);

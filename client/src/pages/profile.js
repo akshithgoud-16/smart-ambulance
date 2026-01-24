@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PopupModal from "../components/PopupModal";
+import { authFetch } from "../utils/api";
 
 function UserProfile({ showToast }) {
   const location = useLocation();
@@ -38,9 +39,7 @@ function UserProfile({ showToast }) {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/users/profile", {
-        credentials: "include",
-      });
+      const res = await authFetch("/api/users/profile");
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Unable to load profile");
 
@@ -109,10 +108,8 @@ function UserProfile({ showToast }) {
     };
 
     try {
-      const res = await fetch("/api/users/profile", {
+      const res = await authFetch("/api/users/profile", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify(payload),
       });
       const data = await res.json();

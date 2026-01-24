@@ -1,11 +1,8 @@
 // Profile service for API operations
+import { authFetch } from "../utils/api";
 
 export const getProfile = async () => {
-  const res = await fetch("/api/users/profile", {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-  });
+  const res = await authFetch("/api/users/profile");
 
   if (!res.ok) {
     throw new Error("Failed to fetch profile");
@@ -15,11 +12,9 @@ export const getProfile = async () => {
 };
 
 export const updateProfile = async (profileData) => {
-  const res = await fetch("/api/users/profile", {
+  const res = await authFetch("/api/users/profile", {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(profileData),
-    credentials: "include",
   });
 
   if (!res.ok) {

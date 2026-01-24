@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { joinBookingRoom, onDriverLocation, getSocket } from "../utils/socket";
 import { getAmbulanceIconUrl, getPoliceIconUrl } from "../utils/mapIcons";
+import { authFetch } from "../utils/api";
 import "../styles/PoliceBookingDetail.css";
 
 const PoliceBookingDetail = ({ showToast }) => {
@@ -31,9 +32,7 @@ const PoliceBookingDetail = ({ showToast }) => {
     const fetchPoliceProfile = async () => {
       try {
         console.log("🚔 Fetching police profile for current location...");
-        const res = await fetch("/api/users/profile", {
-          credentials: "include",
-        });
+        const res = await authFetch("/api/users/profile");
         if (res.ok) {
           const data = await res.json();
           console.log("🚔 Police profile data:", data);

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { getSocket } from "../utils/socket";
+import { authFetch } from "../utils/api";
 import "../styles/PoliceDashboard.css";
 
 const PoliceDashboard = ({ showToast }) => {
@@ -13,9 +14,7 @@ const PoliceDashboard = ({ showToast }) => {
   // Fetch active bookings from backend
   const fetchBookings = useCallback(async () => {
     try {
-      const res = await fetch("/api/police/bookings", {
-        credentials: "include",
-      });
+      const res = await authFetch("/api/police/bookings");
       if (!res.ok) throw new Error("Failed to fetch bookings");
       const data = await res.json();
       

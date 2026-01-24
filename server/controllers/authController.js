@@ -13,10 +13,14 @@ const transporter = nodemailer.createTransport({
   port: 587,
   secure: false,
   auth: {
-    user: process.env.BREVO_SMTP_USER, // 👈 FIX
-    pass: process.env.BREVO_API_KEY,   // 👈 SMTP KEY
+    user: "a078bb001@smtp-brevo.com",   // 👈 EXACTLY AS SHOWN IN BREVO UI
+    pass: process.env.BREVO_API_KEY,    // 👈 SMTP key value (********aRBNzn)
   },
 });
+
+
+
+
 
 
 const fromAddress = () => {
@@ -26,6 +30,21 @@ const fromAddress = () => {
   const fromName = process.env.FROM_NAME || "Smart Ambulance";
   return `${fromName} <${process.env.FROM_EMAIL}>`;
 };
+(async () => {
+  try {
+    await transporter.sendMail({
+      from: fromAddress(),
+      to: "srishanthreddyy05@gmail.com",
+      subject: "SMTP DIRECT TEST",
+      text: "If you receive this, SMTP works.",
+    });
+    console.log("✅ SMTP DIRECT TEST SUCCESS");
+  } catch (err) {
+    console.error("❌ SMTP DIRECT TEST FAILED");
+    console.error(err);
+  }
+})();
+
 
 
 const sendEmail = async ({ to, subject, html }) => {

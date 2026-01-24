@@ -1,7 +1,8 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { joinBookingRoom, emitDriverLocation, onUserLocation, getSocket } from "../utils/socket";
 import { getAmbulanceIconUrl, getPoliceIconUrl } from "../utils/mapIcons";
+import { authFetch } from "../utils/api";
 import "../styles/DriverDashboard.css";
 
 const DriverDashboard = ({ showToast }) => {
@@ -69,7 +70,7 @@ const DriverDashboard = ({ showToast }) => {
     }
   };
 
-  const startOnDutyTracking = (initialPosition) => {
+  const startOnDutyTracking = useCallback((initialPosition) => {
     if (!navigator.geolocation) {
       showToast("Geolocation is not supported", "error");
       return;
@@ -94,10 +95,8 @@ const DriverDashboard = ({ showToast }) => {
       // Persist location for pending bookings proximity filters
       if (onDuty) {
         try {
-          await fetch("/api/users/driver/location", {
+          await authFetch("/api/users/driver/location", {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
             body: JSON.stringify({ lat: coords.lat, lng: coords.lng }),
           });
         } catch (err) {
@@ -128,13 +127,13 @@ const DriverDashboard = ({ showToast }) => {
         timeout: 10000,
       }
     );
-  };
+  }, [driverProfile, onDuty, showToast]);
 
   // Fetch driver profile to get current duty status
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await fetch("/api/users/profile", { credentials: "include" });
+        const res = await authFetch("/api/users/profile");
         if (res.ok) {
           const data = await res.json();
           console.log("Fetched driver profile:", data);
@@ -159,7 +158,7 @@ const DriverDashboard = ({ showToast }) => {
 
     const fetchBookings = async () => {
       try {
-        const res = await fetch("/api/bookings/pending", { credentials: "include" });
+        const res = await authFetch("/api/bookings/pending");
         if (res.ok) {
           const data = await res.json();
           // Filter out dismissed bookings
@@ -210,10 +209,8 @@ const DriverDashboard = ({ showToast }) => {
         if (!cancelled) {
           setOnDuty(false);
           try {
-            await fetch("/api/users/duty", {
+            await authFetch("/api/users/duty", {
               method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              credentials: "include",
               body: JSON.stringify({ onDuty: false }),
             });
           } catch (err) {
@@ -284,9 +281,7 @@ const DriverDashboard = ({ showToast }) => {
     const fetchPoliceLocations = async () => {
       try {
         console.log("🚔 Fetching police locations for booking:", activeBooking._id);
-        const res = await fetch(`/api/bookings/${activeBooking._id}/police-locations`, {
-          credentials: "include"
-        });
+        const res = await authFetch(`/api/bookings/${activeBooking._id}/police-locations`);
         console.log("🚔 Police locations response status:", res.status);
         if (res.ok) {
           const locations = await res.json();
@@ -582,10 +577,8 @@ const DriverDashboard = ({ showToast }) => {
       // Clear any existing error
       setProfileError("");
       
-      const res = await fetch("/api/users/duty", {
+      const res = await authFetch("/api/users/duty", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ onDuty: newStatus }),
       });
 
@@ -633,9 +626,8 @@ const DriverDashboard = ({ showToast }) => {
 
   const acceptBooking = async (id) => {
     try {
-      const res = await fetch(`/api/bookings/${id}/accept`, {
+      const res = await authFetch(`/api/bookings/${id}/accept`, {
         method: "PUT",
-        credentials: "include",
       });
 
       if (!res.ok) {
@@ -661,9 +653,8 @@ const DriverDashboard = ({ showToast }) => {
     }
 
     try {
-      const res = await fetch(`/api/bookings/${activeBooking._id}/complete`, {
+      const res = await authFetch(`/api/bookings/${activeBooking._id}/complete`, {
         method: "PUT",
-        credentials: "include",
       });
 
       const data = await res.json();
@@ -698,9 +689,8 @@ const DriverDashboard = ({ showToast }) => {
     
     setIsCancelling(true);
     try {
-      const res = await fetch(`/api/bookings/${activeBooking._id}/driver-cancel`, {
+      const res = await authFetch(`/api/bookings/${activeBooking._id}/driver-cancel`, {
         method: "PUT",
-        credentials: "include",
       });
 
       if (!res.ok) {

@@ -5,6 +5,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { getSocket } from "../utils/socket";
+import { authFetch } from "../utils/api";
 
 export const useDriverLocation = (driverId, showToast) => {
   const [isTracking, setIsTracking] = useState(false);
@@ -29,9 +30,8 @@ export const useDriverLocation = (driverId, showToast) => {
 
         // Update location on server
         try {
-          await fetch("/api/users/driver/location", {
+          await authFetch("/api/users/driver/location", {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ lat: latitude, lng: longitude }),
           });
 
@@ -73,9 +73,8 @@ export const useDriverLocation = (driverId, showToast) => {
   // Update driver's on-duty status
   const updateOnDutyStatus = async (onDuty) => {
     try {
-      await fetch("/api/users/duty", {
+      await authFetch("/api/users/duty", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ onDuty }),
       });
     } catch (error) {
