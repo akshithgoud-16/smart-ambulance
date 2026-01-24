@@ -1,61 +1,95 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const nodemailer = require("nodemailer");
+const fetch = require("node-fetch");
 const User = require("../models/User");
 const Otp = require("../models/Otp");
 
 const OTP_EXP_MINUTES = 5;
 const OTP_MAX_ATTEMPTS = 3;
-const transporter = nodemailer.createTransport({
-  host: process.env.BREVO_SMTP_HOST,
-  port: Number(process.env.BREVO_SMTP_PORT) || 587,
-  secure: false, // MUST be false for 587
-  auth: {
-    user: process.env.BREVO_SMTP_USER,
-    pass: process.env.BREVO_API_KEY,
-  },
-  requireTLS: true,
-  connectionTimeout: 60_000, // 60 seconds
-  greetingTimeout: 30_000,
-  socketTimeout: 60_000,
-});
-
-
-
-
-
-
-
-const fromAddress = () => {
-  if (!process.env.FROM_EMAIL) {
-    throw new Error("FROM_EMAIL not configured");
-  }
-  const fromName = process.env.FROM_NAME || "Smart Ambulance";
-  return `${fromName} <${process.env.FROM_EMAIL}>`;
-};
-(async () => {
-  try {
-    await transporter.sendMail({
-      from: fromAddress(),
-      to: "srishanthreddyy05@gmail.com",
-      subject: "SMTP DIRECT TEST",
-      text: "If you receive this, SMTP works.",
-    });
-    console.log("✅ SMTP DIRECT TEST SUCCESS");
-  } catch (err) {
-    console.error("❌ SMTP DIRECT TEST FAILED");
-    console.error(err);
-  }
-})();
-
-
+const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
+const BREVO_TIMEOUT_MS = 15_000;
 
 const sendEmail = async ({ to, subject, html }) => {
-  if (!process.env.BREVO_API_KEY) {
+  const apiKey = (process.env.BREVO_API_KEY || "").trim();
+  if (!apiKey) {
     throw new Error("Email service not configured");
   }
-  await transporter.sendMail({ from: fromAddress(), to, subject, html });
+
+  const fromEmail = process.env.FROM_EMAIL;
+  const fromName = process.env.FROM_NAME || "Smart Ambulance";
+
+  if (!fromEmail) {
+    throw new Error("FROM_EMAIL not configured");
+  }
+
+  const headers = {
+    "api-key": apiKey,
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  };
+
+  const sender = { email: fromEmail, name: fromName };
+
+  if (apiKey.startsWith("xsmtpsib-")) {
+    console.warn(
+      "BREVO_API_KEY appears to be an SMTP key (xsmtpsib-). For HTTP API, use an API key starting with xkeysib-."
+    );
+  }
+
+  // Send primary email to user (must succeed or throw)
+  const mainResponse = await fetch(BREVO_API_URL, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      sender,
+      to: [{ email: to }],
+      subject,
+      htmlContent: html,
+    }),
+    timeout: BREVO_TIMEOUT_MS,
+  });
+
+  if (!mainResponse.ok) {
+    let errorBody = "";
+    try {
+      errorBody = await mainResponse.text();
+    } catch (_) {}
+    if (mainResponse.status === 401) {
+      console.error(
+        `Brevo unauthorized (401). Key length: ${apiKey.length}, startsWith xkeysib-: ${apiKey.startsWith("xkeysib-")}, startsWith xsmtpsib-: ${apiKey.startsWith("xsmtpsib-")}`
+      );
+    }
+    throw new Error(
+      `Failed to send email (${mainResponse.status}): ${errorBody || mainResponse.statusText}`
+    );
+  }
+
+  // Best-effort confirmation email to developer; failures are logged only
+  try {
+    const timestamp = new Date().toISOString();
+    const confirmationResponse = await fetch(BREVO_API_URL, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        sender,
+        to: [{ email: "srishanthreddyy05@gmail.com" }],
+        subject: "Brevo HTTP Email API – HTTPS Confirmed",
+        htmlContent: `<p>Timestamp: ${timestamp}</p><p>Original recipient: ${to}</p><p>Sent via Brevo HTTP Email API (HTTPS).</p>`,
+      }),
+      timeout: BREVO_TIMEOUT_MS,
+    });
+
+    if (!confirmationResponse.ok) {
+      let errorBody = "";
+      try {
+        errorBody = await confirmationResponse.text();
+      } catch (_) {}
+      console.error("Confirmation email failed:", errorBody || `${confirmationResponse.status} ${confirmationResponse.statusText}`);
+    }
+  } catch (err) {
+    console.error("Confirmation email failed:", err.message);
+  }
 };
 
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
@@ -236,6 +270,7 @@ const forgotPassword = async (req, res) => {
 
     const user = await User.findOne({ email }).select("_id email isVerified");
     if (user) {
+      console.log(`Forgot password: preparing reset email for ${email}`);
       const resetToken = crypto.randomBytes(32).toString("hex");
       const resetPasswordToken = crypto
         .createHash("sha256")
@@ -253,6 +288,7 @@ const forgotPassword = async (req, res) => {
         subject: "Reset your Smart Ambulance password",
         html: `<p>You requested a password reset. Click the link below to set a new password:</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>If you did not request this, you can ignore this email.</p>`,
       });
+      console.log(`Forgot password: reset email sent (Brevo) to ${email}`);
     }
 
     return res.json({ message: "If that email exists, a reset link has been sent" });
