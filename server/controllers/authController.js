@@ -138,6 +138,8 @@ const sendSignupOtp = async (req, res) => {
       subject: "Your Smart Ambulance verification code",
       html: `<p>Your OTP is <strong>${otp}</strong>. It expires in ${OTP_EXP_MINUTES} minutes.</p>`,
     });
+    console.log(`OTP email sent to ${email}`);
+
 
     return res.json({ message: "OTP sent" });
   } catch (err) {
