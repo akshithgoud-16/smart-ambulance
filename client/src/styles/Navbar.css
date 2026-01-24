@@ -101,6 +101,7 @@
   padding-bottom: 0.25rem;
 }
 
+
 .navbar-logo {
   width: 56px;
   height: 56px;
@@ -112,6 +113,28 @@
   font-weight: bold;
   color: white;
   font-size: 2rem;
+}
+
+@media (max-width: 576px) {
+  .navbar-logo {
+    width: 36px;
+    height: 36px;
+    margin-right: 0.5rem !important;
+  }
+  .navbar-title {
+    font-size: 1.1rem;
+    margin-right: 0.5rem;
+  }
+  .custom-hamburger {
+    width: 36px;
+    height: 36px;
+    margin-left: 0.25rem;
+  }
+  .custom-hamburger .bar {
+    width: 22px;
+    height: 3px;
+    margin: 3px 0;
+  }
 }
 
 /* Nav links */
