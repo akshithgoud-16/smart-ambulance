@@ -30,7 +30,7 @@ export const useDriverLocation = (driverId, showToast) => {
 
         // Update location on server
         try {
-          await authFetch("/api/users/driver/location", {
+          await authFetch("/users/driver/location", {
             method: "PUT",
             body: JSON.stringify({ lat: latitude, lng: longitude }),
           });
@@ -73,7 +73,7 @@ export const useDriverLocation = (driverId, showToast) => {
   // Update driver's on-duty status
   const updateOnDutyStatus = async (onDuty) => {
     try {
-      await authFetch("/api/users/duty", {
+      await authFetch("/users/duty", {
         method: "PUT",
         body: JSON.stringify({ onDuty }),
       });

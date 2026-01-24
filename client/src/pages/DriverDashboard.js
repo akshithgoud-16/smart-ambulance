@@ -95,7 +95,7 @@ const DriverDashboard = ({ showToast }) => {
       // Persist location for pending bookings proximity filters
       if (onDuty) {
         try {
-          await authFetch("/api/users/driver/location", {
+          await authFetch("/users/driver/location", {
             method: "PUT",
             body: JSON.stringify({ lat: coords.lat, lng: coords.lng }),
           });
@@ -133,7 +133,7 @@ const DriverDashboard = ({ showToast }) => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await authFetch("/api/users/profile");
+        const res = await authFetch("/users/profile");
         if (res.ok) {
           const data = await res.json();
           console.log("Fetched driver profile:", data);
@@ -158,7 +158,7 @@ const DriverDashboard = ({ showToast }) => {
 
     const fetchBookings = async () => {
       try {
-        const res = await authFetch("/api/bookings/pending");
+        const res = await authFetch("/bookings/pending");
         if (res.ok) {
           const data = await res.json();
           // Filter out dismissed bookings
@@ -209,7 +209,7 @@ const DriverDashboard = ({ showToast }) => {
         if (!cancelled) {
           setOnDuty(false);
           try {
-            await authFetch("/api/users/duty", {
+            await authFetch("/users/duty", {
               method: "PUT",
               body: JSON.stringify({ onDuty: false }),
             });
@@ -281,7 +281,7 @@ const DriverDashboard = ({ showToast }) => {
     const fetchPoliceLocations = async () => {
       try {
         console.log("🚔 Fetching police locations for booking:", activeBooking._id);
-        const res = await authFetch(`/api/bookings/${activeBooking._id}/police-locations`);
+        const res = await authFetch(`/bookings/${activeBooking._id}/police-locations`);
         console.log("🚔 Police locations response status:", res.status);
         if (res.ok) {
           const locations = await res.json();
@@ -577,7 +577,7 @@ const DriverDashboard = ({ showToast }) => {
       // Clear any existing error
       setProfileError("");
       
-      const res = await authFetch("/api/users/duty", {
+      const res = await authFetch("/users/duty", {
         method: "PUT",
         body: JSON.stringify({ onDuty: newStatus }),
       });
@@ -626,7 +626,7 @@ const DriverDashboard = ({ showToast }) => {
 
   const acceptBooking = async (id) => {
     try {
-      const res = await authFetch(`/api/bookings/${id}/accept`, {
+      const res = await authFetch(`/bookings/${id}/accept`, {
         method: "PUT",
       });
 
@@ -653,7 +653,7 @@ const DriverDashboard = ({ showToast }) => {
     }
 
     try {
-      const res = await authFetch(`/api/bookings/${activeBooking._id}/complete`, {
+      const res = await authFetch(`/bookings/${activeBooking._id}/complete`, {
         method: "PUT",
       });
 
@@ -689,7 +689,7 @@ const DriverDashboard = ({ showToast }) => {
     
     setIsCancelling(true);
     try {
-      const res = await authFetch(`/api/bookings/${activeBooking._id}/driver-cancel`, {
+      const res = await authFetch(`/bookings/${activeBooking._id}/driver-cancel`, {
         method: "PUT",
       });
 

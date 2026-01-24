@@ -32,7 +32,7 @@ const PoliceBookingDetail = ({ showToast }) => {
     const fetchPoliceProfile = async () => {
       try {
         console.log("🚔 Fetching police profile for current location...");
-        const res = await authFetch("/api/users/profile");
+        const res = await authFetch("/users/profile");
         if (res.ok) {
           const data = await res.json();
           console.log("🚔 Police profile data:", data);

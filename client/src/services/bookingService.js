@@ -2,7 +2,7 @@
 import { authFetch } from "../utils/api";
 
 export const createBooking = async (bookingData) => {
-  const res = await authFetch("/api/bookings", {
+  const res = await authFetch("/bookings", {
     method: "POST",
     body: JSON.stringify(bookingData),
   });
@@ -19,7 +19,7 @@ export const createBooking = async (bookingData) => {
 };
 
 export const getBookingById = async (bookingId) => {
-  const res = await authFetch(`/api/bookings/${bookingId}`);
+  const res = await authFetch(`/bookings/${bookingId}`);
 
   if (!res.ok) {
     throw new Error("Unable to load booking details");
@@ -29,7 +29,7 @@ export const getBookingById = async (bookingId) => {
 };
 
 export const checkPendingBooking = async () => {
-  const res = await authFetch("/api/bookings/pending-check");
+  const res = await authFetch("/bookings/pending-check");
 
   if (!res.ok) {
     return { hasPendingBooking: false, booking: null };
@@ -38,7 +38,7 @@ export const checkPendingBooking = async () => {
   return await res.json();
 };
 export const cancelBooking = async (bookingId) => {
-  const res = await authFetch(`/api/bookings/${bookingId}/cancel`, {
+  const res = await authFetch(`/bookings/${bookingId}/cancel`, {
     method: "PUT",
   });
 

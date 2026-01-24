@@ -89,7 +89,7 @@ const BloodHub = ({ showToast }) => {
 
   const fetchMyRequests = async () => {
     try {
-      const res = await authFetch("/api/blood/my-requests");
+      const res = await authFetch("/blood/my-requests");
       const data = await res.json();
       if (res.ok) {
         setMyRequests(data);
@@ -101,7 +101,7 @@ const BloodHub = ({ showToast }) => {
 
   const fetchMyDonations = async () => {
     try {
-      const res = await authFetch("/api/blood/my-donations");
+      const res = await authFetch("/blood/my-donations");
       const data = await res.json();
       if (res.ok) {
         setMyDonations(data);
@@ -113,7 +113,7 @@ const BloodHub = ({ showToast }) => {
 
   const fetchPendingRequests = async () => {
     try {
-      const res = await authFetch("/api/blood/pending");
+      const res = await authFetch("/blood/pending");
       const data = await res.json();
       if (res.ok) {
         setPendingRequests(data);
@@ -145,7 +145,7 @@ const BloodHub = ({ showToast }) => {
       return;
     }
     try {
-      const res = await authFetch("/api/blood/request", {
+      const res = await authFetch("/blood/request", {
         method: "POST",
         body: JSON.stringify(formData),
       });
@@ -177,7 +177,7 @@ const BloodHub = ({ showToast }) => {
 
   const handleAcceptRequest = async (requestId) => {
     try {
-      const res = await authFetch(`/api/blood/accept/${requestId}`, {
+      const res = await authFetch(`/blood/accept/${requestId}`, {
         method: "PUT",
       });
 
@@ -197,7 +197,7 @@ const BloodHub = ({ showToast }) => {
 
   const handleCompleteRequest = async (requestId) => {
     try {
-      const res = await authFetch(`/api/blood/complete/${requestId}`, {
+      const res = await authFetch(`/blood/complete/${requestId}`, {
         method: "PUT",
       });
 
@@ -219,7 +219,7 @@ const BloodHub = ({ showToast }) => {
     if (!window.confirm("Are you sure you want to cancel this request?")) return;
 
     try {
-      const res = await authFetch(`/api/blood/cancel/${requestId}`, {
+      const res = await authFetch(`/blood/cancel/${requestId}`, {
         method: "PUT",
       });
 
@@ -276,7 +276,7 @@ const BloodHub = ({ showToast }) => {
       // Try to get bloodGroup from profile API
       let bloodGroup = null;
       try {
-        const res = await authFetch("/api/users/profile");
+        const res = await authFetch("/users/profile");
         const data = await res.json();
         if (res.ok && data.bloodGroup) bloodGroup = data.bloodGroup;
       } catch {}

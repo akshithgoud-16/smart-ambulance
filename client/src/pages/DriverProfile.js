@@ -22,7 +22,7 @@ function DriverProfile({ showToast }) {
     setLoading(true);
     setError("");
     try {
-      const res = await authFetch("/api/users/profile");
+      const res = await authFetch("/users/profile");
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Unable to load profile");
 
@@ -78,7 +78,7 @@ function DriverProfile({ showToast }) {
     };
 
     try {
-      const res = await authFetch("/api/users/profile", {
+      const res = await authFetch("/users/profile", {
         method: "PUT",
         body: JSON.stringify(payload),
       });

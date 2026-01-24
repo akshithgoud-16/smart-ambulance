@@ -20,7 +20,7 @@ function MyBookings({ showToast }) {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const res = await authFetch("/api/users/bookings");
+        const res = await authFetch("/users/bookings");
         if (res.ok) {
           const data = await res.json();
           setBookings(data);
@@ -40,7 +40,7 @@ function MyBookings({ showToast }) {
   // Cancel booking
   const cancelBooking = async (bookingId) => {
     try {
-      const res = await authFetch(`/api/users/bookings/${bookingId}/cancel`, {
+      const res = await authFetch(`/users/bookings/${bookingId}/cancel`, {
         method: "PUT",
       });
 

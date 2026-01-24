@@ -51,7 +51,7 @@ function Auth({ setIsLoggedIn }) {
     setLoading(true);
 
     try {
-      const res = await authFetch("/api/auth/login", {
+      const res = await authFetch("/auth/login", {
         method: "POST",
         body: JSON.stringify({ email: loginEmail, password: loginPassword }),
       });
@@ -78,7 +78,7 @@ const handleSendOtp = async (e) => {
   setLoading(true);
 
   try {
-    const res = await authFetch("/api/auth/signup/send-otp", {
+    const res = await authFetch("/auth/signup/send-otp", {
       method: "POST",
       body: JSON.stringify({ email: signupEmail })
     });
@@ -105,7 +105,7 @@ const handleSendOtp = async (e) => {
     resetMessages();
     setLoading(true);
     try {
-      const res = await authFetch("/api/auth/forgot-password", {
+      const res = await authFetch("/auth/forgot-password", {
         method: "POST",
         body: JSON.stringify({ email: forgotEmail }),
       });
@@ -209,7 +209,7 @@ const handleSendOtp = async (e) => {
                   return;
                 }
                 // If OTP is not verified, verify it
-                const otpRes = await authFetch("/api/auth/signup/verify-otp", {
+                const otpRes = await authFetch("/auth/signup/verify-otp", {
                   method: "POST",
                   body: JSON.stringify({ email: signupEmail, otp: signupOtp }),
                 });
@@ -220,7 +220,7 @@ const handleSendOtp = async (e) => {
                   return;
                 }
                 // Set password
-                const passRes = await authFetch("/api/auth/signup/set-password", {
+                const passRes = await authFetch("/auth/signup/set-password", {
                   method: "POST",
                   body: JSON.stringify({ email: signupEmail, password: signupPassword, role: signupRole }),
                 });

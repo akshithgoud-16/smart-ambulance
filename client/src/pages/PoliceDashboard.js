@@ -14,7 +14,7 @@ const PoliceDashboard = ({ showToast }) => {
   // Fetch active bookings from backend
   const fetchBookings = useCallback(async () => {
     try {
-      const res = await authFetch("/api/police/bookings");
+      const res = await authFetch("/police/bookings");
       if (!res.ok) throw new Error("Failed to fetch bookings");
       const data = await res.json();
       

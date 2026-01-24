@@ -22,7 +22,7 @@ function Navbar({ isLoggedIn, setIsLoggedIn }) {
 
   const handleLogout = async () => {
     try {
-      await authFetch("/api/auth/logout", {
+      await authFetch("/auth/logout", {
         method: "POST",
       });
     } catch (err) {

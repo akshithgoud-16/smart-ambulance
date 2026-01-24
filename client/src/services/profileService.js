@@ -2,7 +2,7 @@
 import { authFetch } from "../utils/api";
 
 export const getProfile = async () => {
-  const res = await authFetch("/api/users/profile");
+  const res = await authFetch("/users/profile");
 
   if (!res.ok) {
     throw new Error("Failed to fetch profile");
@@ -12,7 +12,7 @@ export const getProfile = async () => {
 };
 
 export const updateProfile = async (profileData) => {
-  const res = await authFetch("/api/users/profile", {
+  const res = await authFetch("/users/profile", {
     method: "PUT",
     body: JSON.stringify(profileData),
   });

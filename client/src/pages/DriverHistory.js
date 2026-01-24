@@ -14,7 +14,7 @@ const DriverHistory = ({ showToast }) => {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const res = await authFetch("/api/bookings/driver");
+        const res = await authFetch("/bookings/driver");
         if (res.ok) {
           const data = await res.json();
           setBookings(data);
