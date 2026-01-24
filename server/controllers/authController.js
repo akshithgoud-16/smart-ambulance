@@ -7,16 +7,20 @@ const Otp = require("../models/Otp");
 
 const OTP_EXP_MINUTES = 5;
 const OTP_MAX_ATTEMPTS = 3;
-
 const transporter = nodemailer.createTransport({
-  host: "smtp-relay.brevo.com",
-  port: 587,
-  secure: false,
+  host: process.env.BREVO_SMTP_HOST,
+  port: Number(process.env.BREVO_SMTP_PORT) || 587,
+  secure: false, // MUST be false for 587
   auth: {
-    user: "a078bb001@smtp-brevo.com",   // 👈 EXACTLY AS SHOWN IN BREVO UI
-    pass: process.env.BREVO_API_KEY,    // 👈 SMTP key value (********aRBNzn)
+    user: process.env.BREVO_SMTP_USER,
+    pass: process.env.BREVO_API_KEY,
   },
+  requireTLS: true,
+  connectionTimeout: 60_000, // 60 seconds
+  greetingTimeout: 30_000,
+  socketTimeout: 60_000,
 });
+
 
 
 
