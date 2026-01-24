@@ -65,10 +65,14 @@
   padding-right: 2rem;
   margin-top: 4rem;
 }
-.mobile-drawer .nav-link,
-.mobile-drawer .btn-signup {
+.mobile-drawer .nav-link {
   font-size: 1.2rem;
   color: #fff !important;
+  text-align: left;
+}
+.mobile-drawer .btn-signup {
+  font-size: 1.2rem;
+  color: #003049 !important;
   text-align: left;
 }
 .mobile-drawer .nav-link:hover {
