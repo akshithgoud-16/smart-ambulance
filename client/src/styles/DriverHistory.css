@@ -1,3 +1,90 @@
+@media (max-width: 600px) {
+  .driver-history-page {
+    padding: 10px 4px;
+    min-height: unset;
+  }
+  .driver-history-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .driver-history-header h1 {
+    font-size: 20px;
+  }
+  .history-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    justify-items: center;
+    justify-content: center;
+    display: grid;
+  }
+  .history-card {
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    width: 100%;
+    max-width: 400px;
+  }
+  .history-card-header {
+    padding: 12px 10px;
+  }
+  .history-card-header h4 {
+    font-size: 13px;
+  }
+  .history-status {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+  .history-card-body {
+    padding: 12px 10px;
+  }
+  .history-info-row {
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+  }
+  .history-info-row .label {
+    font-size: 10px;
+  }
+  .history-info-row .value {
+    font-size: 12px;
+  }
+  .history-card-footer {
+    padding: 10px 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .history-card-footer small {
+    font-size: 11px;
+  }
+  .track-route-btn {
+    padding: 6px 12px;
+    font-size: 11px;
+    border-radius: 6px;
+  }
+  .no-history {
+    padding: 30px 8px;
+    border-radius: 10px;
+  }
+  .no-history h3 {
+    font-size: 16px;
+  }
+  .no-history p {
+    font-size: 13px;
+  }
+  .loading-state {
+    padding: 30px 8px;
+    font-size: 15px;
+  }
+  .loading-spinner {
+    width: 32px;
+    height: 32px;
+    border-width: 3px;
+    margin-bottom: 10px;
+  }
+}
 /* === Driver History Styles === */
 
 .driver-history-page {
