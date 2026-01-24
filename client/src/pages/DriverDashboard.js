@@ -47,6 +47,89 @@ const DriverDashboard = ({ showToast }) => {
     return missingFields.length === 0;
   };
 
+  const requestLocationPermission = () => {
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) {
+        resolve({ granted: false, error: new Error("Geolocation is not supported") });
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => resolve({ granted: true, position }),
+        (error) => resolve({ granted: false, error }),
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    });
+  };
+
+  const stopOnDutyTracking = () => {
+    if (locationWatchId.current !== null) {
+      navigator.geolocation.clearWatch(locationWatchId.current);
+      locationWatchId.current = null;
+    }
+  };
+
+  const startOnDutyTracking = (initialPosition) => {
+    if (!navigator.geolocation) {
+      showToast("Geolocation is not supported", "error");
+      return;
+    }
+
+    stopOnDutyTracking();
+    const socket = getSocket();
+
+    const emitLocation = (coords) => {
+      if (!driverProfile?._id || !onDuty) return;
+      socket.emit("driver:locationUpdate", {
+        driverId: driverProfile._id,
+        lat: coords.lat,
+        lng: coords.lng,
+      });
+    };
+
+    const pushLocation = async (coords) => {
+      setDriverLocation(coords);
+      emitLocation(coords);
+
+      // Persist location for pending bookings proximity filters
+      if (onDuty) {
+        try {
+          await fetch("/api/users/driver/location", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ lat: coords.lat, lng: coords.lng }),
+          });
+        } catch (err) {
+          console.error("Failed to persist driver location:", err);
+        }
+      }
+    };
+
+    if (initialPosition?.coords) {
+      pushLocation({
+        lat: initialPosition.coords.latitude,
+        lng: initialPosition.coords.longitude,
+      });
+    }
+
+    dutySessionActive.current = true;
+    locationWatchId.current = navigator.geolocation.watchPosition(
+      (pos) => {
+        pushLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      },
+      (error) => {
+        console.error("Geolocation watch error:", error);
+        showToast("Unable to track location. Please enable location services.", "error");
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 10000,
+      }
+    );
+  };
+
   // Fetch driver profile to get current duty status
   useEffect(() => {
     const fetchProfile = async () => {
@@ -467,89 +550,6 @@ const DriverDashboard = ({ showToast }) => {
         [bookingId]: `${lat.toFixed(4)}, ${lng.toFixed(4)}`
       }));
     }
-  };
-
-  const requestLocationPermission = () => {
-    return new Promise((resolve) => {
-      if (!navigator.geolocation) {
-        resolve({ granted: false, error: new Error("Geolocation is not supported") });
-        return;
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        (position) => resolve({ granted: true, position }),
-        (error) => resolve({ granted: false, error }),
-        { enableHighAccuracy: true, timeout: 10000 }
-      );
-    });
-  };
-
-  const stopOnDutyTracking = () => {
-    if (locationWatchId.current !== null) {
-      navigator.geolocation.clearWatch(locationWatchId.current);
-      locationWatchId.current = null;
-    }
-  };
-
-  const startOnDutyTracking = (initialPosition) => {
-    if (!navigator.geolocation) {
-      showToast("Geolocation is not supported", "error");
-      return;
-    }
-
-    stopOnDutyTracking();
-    const socket = getSocket();
-
-    const emitLocation = (coords) => {
-      if (!driverProfile?._id || !onDuty) return;
-      socket.emit("driver:locationUpdate", {
-        driverId: driverProfile._id,
-        lat: coords.lat,
-        lng: coords.lng,
-      });
-    };
-
-    const pushLocation = async (coords) => {
-      setDriverLocation(coords);
-      emitLocation(coords);
-
-      // Persist location for pending bookings proximity filters
-      if (onDuty) {
-        try {
-          await fetch("/api/users/driver/location", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ lat: coords.lat, lng: coords.lng }),
-          });
-        } catch (err) {
-          console.error("Failed to persist driver location:", err);
-        }
-      }
-    };
-
-    if (initialPosition?.coords) {
-      pushLocation({
-        lat: initialPosition.coords.latitude,
-        lng: initialPosition.coords.longitude,
-      });
-    }
-
-    dutySessionActive.current = true;
-    locationWatchId.current = navigator.geolocation.watchPosition(
-      (pos) => {
-        pushLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-      },
-      (error) => {
-        console.error("Geolocation watch error:", error);
-        showToast("Unable to track location. Please enable location services.", "error");
-      },
-      {
-        enableHighAccuracy: true,
-        maximumAge: 0,
-        timeout: 10000,
-      }
-    );
   };
 
   const handleDutyToggle = async () => {
