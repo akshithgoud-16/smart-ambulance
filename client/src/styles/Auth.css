@@ -1,3 +1,8 @@
+.otp-inline-input {
+  flex: 1 1 0;
+  min-width: 0;
+  margin-bottom: 0 !important;
+}
 .small-otp-btn {
   padding: 0.3rem 0.7rem !important;
   font-size: 0.85rem !important;
@@ -7,13 +12,25 @@
 }
 .signup-otp-row {
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 0.5rem;
+  width: 100%;
+  margin-bottom: 1.1rem;
+}
+.signup-otp-row input.signup-input {
+  flex: 2 1 0;
+  min-width: 0;
+  margin-bottom: 0 !important;
 }
 .signup-otp-row .otp-btn {
+  flex: 1 1 0;
+  max-width: 160px;
+  min-width: 90px;
   height: 38px;
   white-space: nowrap;
   margin-top: 0;
+  margin-bottom: 0 !important;
 }
 .signup-form-custom .signup-input {
   font-size: 0.98rem;
@@ -31,6 +48,52 @@
 .signup-form-custom select.signup-input {
   padding-right: 2rem;
 }
+
+.otp-inline-input {
+  background: #fefae0 !important;
+  color: #264653 !important;
+  border: none;
+  border-radius: 15px;
+  padding: 1rem 1.2rem;
+  font-size: 1rem;
+}
+
+.otp-inline-input::placeholder {
+  color: #264653 !important;
+}
+
+/* Focus state to match others */
+.otp-inline-input:focus {
+  outline: none;
+  background: #ffffff !important;
+  box-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+
+.signup-otp-row .otp-btn {
+  background: #aec3b0 !important;   /* same as primary button */
+  color: #fff !important;
+  border: none !important;
+  font-weight: 700;
+  height: 38px;                     /* align with input */
+  transition: all 0.3s ease;
+}
+
+/* Hover */
+.signup-otp-row .otp-btn:hover:not(:disabled) {
+  background: #9bb3a0 !important;
+  transform: scale(1.05);
+  box-shadow: 0 6px 15px rgba(255,255,255,0.35);
+}
+
+/* Disabled state */
+.signup-otp-row .otp-btn:disabled {
+  background: #9bb3a0 !important;
+  color: #ffffff !important;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 /* General background animation */
 .auth-page {
   min-height: 100vh;

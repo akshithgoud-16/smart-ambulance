@@ -1,5 +1,5 @@
 // src/pages/Auth.js
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Auth.css";
 import { getSocket } from "../utils/socket";
@@ -13,12 +13,15 @@ function Auth({ setIsLoggedIn }) {
   const [signupOtp, setSignupOtp] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [signupRole, setSignupRole] = useState("user");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpTimeoutId, setOtpTimeoutId] = useState(null);
 
   const [forgotEmail, setForgotEmail] = useState("");
 
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -72,32 +75,42 @@ function Auth({ setIsLoggedIn }) {
   };
 
 
-const handleSendOtp = async (e) => {
-  e.preventDefault();
-  resetMessages();
-  setLoading(true);
-
-  try {
-    const res = await authFetch("/auth/signup/send-otp", {
-      method: "POST",
-      body: JSON.stringify({ email: signupEmail })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      setError(data.message || "Unable to send OTP");
-      return;
+  const handleSendOtp = async (e) => {
+    e.preventDefault();
+    resetMessages();
+    setOtpLoading(true);
+    try {
+      const res = await authFetch("/auth/signup/send-otp", {
+        method: "POST",
+        body: JSON.stringify({ email: signupEmail })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.message || "Unable to send OTP");
+        setOtpSent(false);
+        return;
+      }
+      setInfo("OTP sent to your email. It expires in 5 minutes.");
+      setOtpSent(true);
+      // Reset to Send OTP after 60 seconds
+      if (otpTimeoutId) clearTimeout(otpTimeoutId);
+      const timeout = setTimeout(() => setOtpSent(false), 60000);
+      setOtpTimeoutId(timeout);
+    } catch (err) {
+      console.error(err);
+      setError("Server error. Try again later.");
+      setOtpSent(false);
+    } finally {
+      setOtpLoading(false);
     }
+  };
 
-    setInfo("OTP sent to your email. It expires in 5 minutes.");
-  } catch (err) {
-    console.error(err);
-    setError("Server error. Try again later.");
-  } finally {
-    setLoading(false);
-  }
-};
+  // Reset OTP sent state if email changes
+  React.useEffect(() => {
+    setOtpSent(false);
+    if (otpTimeoutId) clearTimeout(otpTimeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signupEmail]);
 
 
   const handleForgotPassword = async (e) => {
@@ -250,25 +263,25 @@ const handleSendOtp = async (e) => {
                 />
                 <label>Email</label>
               </div>
-              <div className="form-group signup-otp-row">
+              <div className="signup-otp-row">
                 <input
                   type="text"
                   required
-                  className="form-control signup-input"
+                  className="form-control signup-input otp-inline-input"
                   value={signupOtp}
                   onChange={(e) => setSignupOtp(e.target.value)}
                   placeholder="Enter OTP"
                   maxLength={6}
                   autoComplete="one-time-code"
-                  style={{ minWidth: 0, flex: 1 }}
                 />
                 <button
                   type="button"
                   className="btn-secondary otp-btn small-otp-btn"
-                  disabled={loading || !signupEmail}
+                  disabled={otpLoading || !signupEmail || otpSent}
                   onClick={handleSendOtp}
+                  style={otpSent ? { background: '#a6f4c5', color: '#1b263b', border: '1px solid #a6f4c5' } : {}}
                 >
-                  Send OTP
+                  {otpLoading ? "Sending..." : otpSent ? <span style={{display:'inline-flex',alignItems:'center',gap:'0.3em'}}>&#10003; Sent OTP</span> : "Send OTP"}
                 </button>
               </div>
               <div className="form-group">
