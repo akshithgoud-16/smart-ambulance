@@ -38,7 +38,7 @@ function ResetPassword() {
 
     setLoading(true);
     try {
-      const res = await authFetch(`/api/auth/reset-password/${token}`, {
+      const res = await authFetch(`/auth/reset-password/${token}`, {
         method: "POST",
         body: JSON.stringify({ password }),
       });
