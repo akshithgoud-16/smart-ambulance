@@ -16,11 +16,22 @@ function ResetPassword() {
 
   const handleReset = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
     setError("");
     setInfo("");
 
+    if (!token) {
+      setError("Invalid reset link");
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError("Passwords do not match");
+      return;
+    }
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters");
       return;
     }
 
@@ -28,18 +39,24 @@ function ResetPassword() {
     try {
       const res = await fetch(`/api/auth/reset-password/${token}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
         body: JSON.stringify({ password }),
       });
+      
       const data = await res.json();
+      
       if (!res.ok) {
         setError(data.message || "Unable to reset password");
         return;
       }
+      
       setInfo("Password updated. You can login now.");
       setTimeout(() => navigate("/auth"), 1500);
     } catch (err) {
-      console.error(err);
+      console.error("Reset password error:", err);
       setError("Server error. Try again later.");
     } finally {
       setLoading(false);
