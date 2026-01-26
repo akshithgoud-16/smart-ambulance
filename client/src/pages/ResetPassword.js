@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { authFetch } from "../utils/api";
 import "../styles/Auth.css";
@@ -11,6 +12,8 @@ function ResetPassword() {
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
 
   const email = searchParams.get("email") || "";
@@ -73,9 +76,9 @@ function ResetPassword() {
         <div className="auth-right">
           <form onSubmit={handleReset} className="auth-form">
             <h2>Create New Password</h2>
-            <div className="form-group">
+            <div className="form-group" style={{ position: "relative" }}>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 required
                 minLength={8}
                 className="form-control"
@@ -84,10 +87,26 @@ function ResetPassword() {
                 placeholder=" "
               />
               <label>New Password</label>
+              <span
+                onClick={() => setShowPassword((v) => !v)}
+                style={{
+                  position: "absolute",
+                  right: "12px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  cursor: "pointer",
+                  color: "#888",
+                  fontSize: "1.2em"
+                }}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                tabIndex={0}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </span>
             </div>
-            <div className="form-group">
+            <div className="form-group" style={{ position: "relative" }}>
               <input
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 required
                 minLength={8}
                 className="form-control"
@@ -96,6 +115,22 @@ function ResetPassword() {
                 placeholder=" "
               />
               <label>Confirm Password</label>
+              <span
+                onClick={() => setShowConfirmPassword((v) => !v)}
+                style={{
+                  position: "absolute",
+                  right: "12px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  cursor: "pointer",
+                  color: "#888",
+                  fontSize: "1.2em"
+                }}
+                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                tabIndex={0}
+              >
+                {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+              </span>
             </div>
             <button type="submit" className="btn-primary" disabled={loading}>
               {loading ? "Updating..." : "Reset Password"}
