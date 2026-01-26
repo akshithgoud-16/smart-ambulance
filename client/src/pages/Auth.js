@@ -1,17 +1,21 @@
 // src/pages/Auth.js
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Auth.css";
 import { getSocket } from "../utils/socket";
 import { authFetch } from "../utils/api"; // adjust path if needed
+
 function Auth({ setIsLoggedIn }) {
   const [mode, setMode] = useState("login"); // login | signup | forgot
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
 
   const [signupEmail, setSignupEmail] = useState("");
   const [signupOtp, setSignupOtp] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [signupRole, setSignupRole] = useState("user");
   const [otpSent, setOtpSent] = useState(false);
   const [otpTimeoutId, setOtpTimeoutId] = useState(null);
@@ -182,9 +186,9 @@ function Auth({ setIsLoggedIn }) {
                 />
                 <label>Email</label>
               </div>
-              <div className="form-group">
+              <div className="form-group" style={{ position: "relative" }}>
                 <input
-                  type="password"
+                  type={showLoginPassword ? "text" : "password"}
                   required
                   className="form-control"
                   value={loginPassword}
@@ -192,6 +196,22 @@ function Auth({ setIsLoggedIn }) {
                   placeholder=" "
                 />
                 <label>Password</label>
+                <span
+                  onClick={() => setShowLoginPassword((v) => !v)}
+                  style={{
+                    position: "absolute",
+                    right: "12px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    cursor: "pointer",
+                    color: "#888",
+                    fontSize: "1.2em"
+                  }}
+                  aria-label={showLoginPassword ? "Hide password" : "Show password"}
+                  tabIndex={0}
+                >
+                  {showLoginPassword ? <FaEyeSlash /> : <FaEye />}
+                </span>
               </div>
               <button type="submit" className="btn-primary" disabled={loading}>
                 {loading ? "Please wait..." : "Login"}
@@ -284,9 +304,9 @@ function Auth({ setIsLoggedIn }) {
                   {otpLoading ? "Sending..." : otpSent ? <span style={{display:'inline-flex',alignItems:'center',gap:'0.3em'}}>&#10003; Sent OTP</span> : "Send OTP"}
                 </button>
               </div>
-              <div className="form-group">
+              <div className="form-group" style={{ position: "relative" }}>
                 <input
-                  type="password"
+                  type={showSignupPassword ? "text" : "password"}
                   required
                   className="form-control signup-input"
                   value={signupPassword}
@@ -296,6 +316,22 @@ function Auth({ setIsLoggedIn }) {
                   autoComplete="new-password"
                 />
                 <label>Create Password</label>
+                <span
+                  onClick={() => setShowSignupPassword((v) => !v)}
+                  style={{
+                    position: "absolute",
+                    right: "12px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    cursor: "pointer",
+                    color: "#888",
+                    fontSize: "1.2em"
+                  }}
+                  aria-label={showSignupPassword ? "Hide password" : "Show password"}
+                  tabIndex={0}
+                >
+                  {showSignupPassword ? <FaEyeSlash /> : <FaEye />}
+                </span>
               </div>
               <div className="form-group">
                 <select
