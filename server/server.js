@@ -1,3 +1,4 @@
+process.env.NODE_OPTIONS = "--dns-result-order=ipv4first";
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -10,6 +11,7 @@ const bookingRoutes = require("./routes/bookingRoutes");
 const policeRoutes = require("./routes/policeRoutes");
 const userRoutes = require("./routes/userRoutes");
 const bloodRoutes = require("./routes/bloodRoutes");
+const aiRoutes = require("./routes/aiRoutes");
 const { errorHandler, notFound } = require("./middleware/errorMiddleware");
 
 const app = express();
@@ -74,6 +76,8 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/police", policeRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/blood", bloodRoutes);
+app.use("/api/ai", require("./routes/aiRoutes"));
+
 
 // Error handling middleware
 app.use(notFound);

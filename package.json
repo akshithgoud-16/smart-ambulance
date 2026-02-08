@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@mapbox/polyline": "^1.2.1",
     "@react-google-maps/api": "^2.20.7",
     "express": "^5.1.0",
