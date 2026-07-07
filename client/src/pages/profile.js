@@ -1,6 +1,20 @@
 import { useCallback, useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import PopupModal from "../components/PopupModal";
+import { authFetch } from "../utils/api";
 
 function UserProfile({ showToast }) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [showProfilePopup, setShowProfilePopup] = useState(false);
+    // Show popup if redirected from Book Now due to incomplete profile
+    useEffect(() => {
+      if (location.state && location.state.requireProfileCompletion) {
+        setShowProfilePopup(true);
+        // Clean up state so popup doesn't show on refresh
+        navigate(location.pathname, { replace: true, state: {} });
+      }
+    }, [location, navigate]);
   const [form, setForm] = useState({
     displayName: "",
     mobile: "",
@@ -12,14 +26,20 @@ function UserProfile({ showToast }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [validation, setValidation] = useState({
+    displayName: "",
+    mobile: "",
+    dob: "",
+    bloodGroup: "",
+    area: "",
+    pincode: "",
+  });
 
   const fetchProfile = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("http://localhost:5000/api/users/profile", {
-        credentials: "include",
-      });
+      const res = await authFetch("/users/profile");
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Unable to load profile");
 
@@ -46,6 +66,31 @@ function UserProfile({ showToast }) {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+
+    // Inline validation
+    setValidation((prev) => {
+      const v = { ...prev };
+      if (name === "mobile") {
+        if (!/^\d{10}$/.test(value)) v.mobile = "Mobile must be 10 digits"; else v.mobile = "";
+      }
+      if (name === "pincode") {
+        if (!/^\d{6}$/.test(value)) v.pincode = "Pincode must be 6 digits"; else v.pincode = "";
+      }
+      if (name === "bloodGroup") {
+        if (!value) v.bloodGroup = "Please select a blood group"; else v.bloodGroup = "";
+      }
+      if (name === "dob") {
+        const d = value ? new Date(value) : null;
+        if (!d || Number.isNaN(d.getTime()) || d > new Date()) v.dob = "Enter a valid past date"; else v.dob = "";
+      }
+      if (name === "area") {
+        v.area = value.trim() ? "" : "Area is required";
+      }
+      if (name === "displayName") {
+        v.displayName = value.trim() ? "" : "Name is required";
+      }
+      return v;
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -63,10 +108,8 @@ function UserProfile({ showToast }) {
     };
 
     try {
-      const res = await fetch("http://localhost:5000/api/users/profile", {
+      const res = await authFetch("/users/profile", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify(payload),
       });
       const data = await res.json();
@@ -91,8 +134,21 @@ function UserProfile({ showToast }) {
     }
   };
 
+  const allValid =
+    form.displayName.trim() &&
+    /^\d{10}$/.test(form.mobile) &&
+    form.dob && !validation.dob &&
+    !!form.bloodGroup &&
+    form.area.trim() &&
+    /^\d{6}$/.test(form.pincode);
+
   return (
     <div className="police-profile-page">
+      <PopupModal
+        open={showProfilePopup}
+        message="Please fill your details to continue booking."
+        onClose={() => setShowProfilePopup(false)}
+      />
       <div className="profile-header">
         <div>
           <p>Update your personal details for better service.</p>
@@ -115,6 +171,7 @@ function UserProfile({ showToast }) {
                 onChange={handleInputChange}
                 placeholder="e.g., John Doe"
               />
+              {validation.displayName && <small className="text-danger">{validation.displayName}</small>}
             </div>
             <div className="form-row">
               <label>Mobile Number</label>
@@ -124,6 +181,7 @@ function UserProfile({ showToast }) {
                 onChange={handleInputChange}
                 placeholder="e.g., 9876543210"
               />
+              {validation.mobile && <small className="text-danger">{validation.mobile}</small>}
             </div>
             <div className="form-row">
               <label>Date of Birth</label>
@@ -133,6 +191,7 @@ function UserProfile({ showToast }) {
                 value={form.dob}
                 onChange={handleInputChange}
               />
+              {validation.dob && <small className="text-danger">{validation.dob}</small>}
             </div>
             <div className="form-row">
               <label>Blood Group</label>
@@ -151,6 +210,7 @@ function UserProfile({ showToast }) {
                 <option value="O+">O+</option>
                 <option value="O-">O-</option>
               </select>
+              {validation.bloodGroup && <small className="text-danger">{validation.bloodGroup}</small>}
             </div>
             <div className="form-row grid-2">
               <div>
@@ -161,6 +221,7 @@ function UserProfile({ showToast }) {
                   onChange={handleInputChange}
                   placeholder="Your area"
                 />
+                {validation.area && <small className="text-danger">{validation.area}</small>}
               </div>
               <div>
                 <label>Pincode</label>
@@ -170,10 +231,11 @@ function UserProfile({ showToast }) {
                   onChange={handleInputChange}
                   placeholder="e.g., 500001"
                 />
+                {validation.pincode && <small className="text-danger">{validation.pincode}</small>}
               </div>
             </div>
 
-            <button className="save-btn" type="submit" disabled={saving}>
+            <button className="save-btn" type="submit" disabled={saving || !allValid}>
               {saving ? "Saving..." : "Save Changes"}
             </button>
           </form>

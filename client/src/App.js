@@ -12,6 +12,7 @@ import LiveTracking from "./pages/LiveTracking";
 import Help from "./pages/help";
 import ContactUs from "./pages/contactUs";
 import MyBookings from "./pages/MyBookings";
+import ResetPassword from "./pages/ResetPassword";
 import DriverDashboard from "./pages/DriverDashboard";
 import DriverHistory from "./pages/DriverHistory";
 import DriverTracking from "./pages/DriverTracking";
@@ -25,6 +26,7 @@ import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Toast from "./components/Toast";
 import "./styles/toast.css"; // Import toast styles globally
+import Footer from "./components/Footer";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -38,7 +40,8 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
+    const token = localStorage.getItem("token");
+    const loggedIn = !!token;
     setIsLoggedIn(loggedIn);
 
     // Join user room for blood notifications if logged in as user
@@ -65,6 +68,7 @@ function App() {
         <Route path="/help" element={<Help />} />
         <Route path="/contactUs" element={<ContactUs />} />
         <Route path="/MyBookings" element={<MyBookings showToast={showToast} />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/driver" element={
           <ProtectedRoute allowedRoles={["driver"]}>
             <DriverDashboard showToast={showToast} />
@@ -128,6 +132,7 @@ function App() {
           />
         ))}
       </div>
+      <Footer />
     </Router>
   );
 }

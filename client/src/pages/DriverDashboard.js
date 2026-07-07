@@ -1,7 +1,8 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { joinBookingRoom, emitDriverLocation, onUserLocation, getSocket } from "../utils/socket";
 import { getAmbulanceIconUrl, getPoliceIconUrl } from "../utils/mapIcons";
+import { authFetch } from "../utils/api";
 import "../styles/DriverDashboard.css";
 
 const DriverDashboard = ({ showToast }) => {
@@ -30,6 +31,8 @@ const DriverDashboard = ({ showToast }) => {
   const driverToPickupRenderer = useRef(null);
   const pickupToDestRenderer = useRef(null);
   const trackingInterval = useRef(null);
+  const locationWatchId = useRef(null);
+  const dutySessionActive = useRef(false);
   const navigate = useNavigate();
 
   // Check if all required profile fields are filled
@@ -45,11 +48,92 @@ const DriverDashboard = ({ showToast }) => {
     return missingFields.length === 0;
   };
 
+  const requestLocationPermission = () => {
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) {
+        resolve({ granted: false, error: new Error("Geolocation is not supported") });
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => resolve({ granted: true, position }),
+        (error) => resolve({ granted: false, error }),
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    });
+  };
+
+  const stopOnDutyTracking = () => {
+    if (locationWatchId.current !== null) {
+      navigator.geolocation.clearWatch(locationWatchId.current);
+      locationWatchId.current = null;
+    }
+  };
+
+  const startOnDutyTracking = useCallback((initialPosition) => {
+    if (!navigator.geolocation) {
+      showToast("Geolocation is not supported", "error");
+      return;
+    }
+
+    stopOnDutyTracking();
+    const socket = getSocket();
+
+    const emitLocation = (coords) => {
+      if (!driverProfile?._id || !onDuty) return;
+      socket.emit("driver:locationUpdate", {
+        driverId: driverProfile._id,
+        lat: coords.lat,
+        lng: coords.lng,
+      });
+    };
+
+    const pushLocation = async (coords) => {
+      setDriverLocation(coords);
+      emitLocation(coords);
+
+      // Persist location for pending bookings proximity filters
+      if (onDuty) {
+        try {
+          await authFetch("/users/driver/location", {
+            method: "PUT",
+            body: JSON.stringify({ lat: coords.lat, lng: coords.lng }),
+          });
+        } catch (err) {
+          console.error("Failed to persist driver location:", err);
+        }
+      }
+    };
+
+    if (initialPosition?.coords) {
+      pushLocation({
+        lat: initialPosition.coords.latitude,
+        lng: initialPosition.coords.longitude,
+      });
+    }
+
+    dutySessionActive.current = true;
+    locationWatchId.current = navigator.geolocation.watchPosition(
+      (pos) => {
+        pushLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      },
+      (error) => {
+        console.error("Geolocation watch error:", error);
+        showToast("Unable to track location. Please enable location services.", "error");
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 10000,
+      }
+    );
+  }, [driverProfile, onDuty, showToast]);
+
   // Fetch driver profile to get current duty status
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/users/profile", { credentials: "include" });
+        const res = await authFetch("/users/profile");
         if (res.ok) {
           const data = await res.json();
           console.log("Fetched driver profile:", data);
@@ -74,7 +158,7 @@ const DriverDashboard = ({ showToast }) => {
 
     const fetchBookings = async () => {
       try {
-        const res = await fetch("/api/bookings/pending", { credentials: "include" });
+        const res = await authFetch("/bookings/pending");
         if (res.ok) {
           const data = await res.json();
           // Filter out dismissed bookings
@@ -96,6 +180,64 @@ const DriverDashboard = ({ showToast }) => {
     const interval = setInterval(fetchBookings, 5000);
     return () => clearInterval(interval);
   }, [onDuty, showToast, dismissedBookings]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const resumeTrackingIfNeeded = async () => {
+      if (!onDuty) {
+        const wasOnDutySession = dutySessionActive.current;
+
+        if (locationWatchId.current !== null) {
+          stopOnDutyTracking();
+        }
+
+        if (wasOnDutySession && driverProfile?._id) {
+          const socket = getSocket();
+          socket.emit("driver:offDuty", { driverId: driverProfile._id });
+        }
+
+        dutySessionActive.current = false;
+        return;
+      }
+
+      if (locationWatchId.current !== null) return;
+
+      const permission = await requestLocationPermission();
+
+      if (!permission.granted) {
+        if (!cancelled) {
+          setOnDuty(false);
+          try {
+            await authFetch("/users/duty", {
+              method: "PUT",
+              body: JSON.stringify({ onDuty: false }),
+            });
+          } catch (err) {
+            console.error("Failed to sync off-duty state after permission denial:", err);
+          }
+          showToast("Location permission is required to stay on duty", "error");
+        }
+        return;
+      }
+
+      if (cancelled) return;
+
+      if (driverProfile?._id) {
+        const socket = getSocket();
+        socket.emit("driver:onDuty", { driverId: driverProfile._id });
+      }
+
+      dutySessionActive.current = true;
+      startOnDutyTracking(permission.position);
+    };
+
+    resumeTrackingIfNeeded();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [onDuty, driverProfile, showToast, startOnDutyTracking]);
 
   // Initialize Google Map when active booking exists
   useEffect(() => {
@@ -139,9 +281,7 @@ const DriverDashboard = ({ showToast }) => {
     const fetchPoliceLocations = async () => {
       try {
         console.log("🚔 Fetching police locations for booking:", activeBooking._id);
-        const res = await fetch(`/api/bookings/${activeBooking._id}/police-locations`, {
-          credentials: "include"
-        });
+        const res = await authFetch(`/bookings/${activeBooking._id}/police-locations`);
         console.log("🚔 Police locations response status:", res.status);
         if (res.ok) {
           const locations = await res.json();
@@ -410,6 +550,7 @@ const DriverDashboard = ({ showToast }) => {
   const handleDutyToggle = async () => {
     try {
       const newStatus = !onDuty;
+      let permissionResult = null;
       
       // Check if profile is complete before turning on duty
       if (newStatus) {
@@ -419,27 +560,55 @@ const DriverDashboard = ({ showToast }) => {
           setTimeout(() => setProfileError(""), 5000);
           return;
         }
+
+        permissionResult = await requestLocationPermission();
+
+        if (!permissionResult.granted) {
+          const permissionMessage = permissionResult.error?.code === 1
+            ? "Location permission denied. Please enable location to go on duty."
+            : "Unable to access location. Please enable location services.";
+
+          setOnDuty(false);
+          showToast(permissionMessage, "error");
+          return;
+        }
       }
       
       // Clear any existing error
       setProfileError("");
       
-      const res = await fetch("http://localhost:5000/api/users/duty", {
+      const res = await authFetch("/users/duty", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ onDuty: newStatus }),
       });
 
-      if (res.ok) {
-        setOnDuty(newStatus);
-        showToast(newStatus ? "✅ You are now on duty" : "⚠️ You are now off duty", "success");
-        if (!newStatus) {
-          setPendingBookings([]);
-        }
-      } else {
-        const data = await res.json();
+      const data = await res.json();
+
+      if (!res.ok) {
         showToast(data.message || "Failed to update duty status", "error");
+        return;
+      }
+
+      setOnDuty(newStatus);
+
+      if (newStatus) {
+        const socket = getSocket();
+        if (driverProfile?._id) {
+          socket.emit("driver:onDuty", { driverId: driverProfile._id });
+        }
+        dutySessionActive.current = true;
+        startOnDutyTracking(permissionResult?.position);
+        showToast("✅ You are now on duty", "success");
+      } else {
+        const wasOnDutySession = dutySessionActive.current;
+        stopOnDutyTracking();
+        if (wasOnDutySession && driverProfile?._id) {
+          const socket = getSocket();
+          socket.emit("driver:offDuty", { driverId: driverProfile._id });
+        }
+        dutySessionActive.current = false;
+        setPendingBookings([]);
+        showToast("⚠️ You are now off duty", "success");
       }
     } catch (err) {
       console.error(err);
@@ -457,9 +626,8 @@ const DriverDashboard = ({ showToast }) => {
 
   const acceptBooking = async (id) => {
     try {
-      const res = await fetch(`/api/bookings/${id}/accept`, {
+      const res = await authFetch(`/bookings/${id}/accept`, {
         method: "PUT",
-        credentials: "include",
       });
 
       if (!res.ok) {
@@ -485,9 +653,8 @@ const DriverDashboard = ({ showToast }) => {
     }
 
     try {
-      const res = await fetch(`/api/bookings/${activeBooking._id}/complete`, {
+      const res = await authFetch(`/bookings/${activeBooking._id}/complete`, {
         method: "PUT",
-        credentials: "include",
       });
 
       const data = await res.json();
@@ -522,9 +689,8 @@ const DriverDashboard = ({ showToast }) => {
     
     setIsCancelling(true);
     try {
-      const res = await fetch(`/api/bookings/${activeBooking._id}/driver-cancel`, {
+      const res = await authFetch(`/bookings/${activeBooking._id}/driver-cancel`, {
         method: "PUT",
-        credentials: "include",
       });
 
       if (!res.ok) {
@@ -551,43 +717,12 @@ const DriverDashboard = ({ showToast }) => {
     }
   };
 
-  const handleFetchLocation = async () => {
-    if (!navigator.geolocation) {
-      showToast("Geolocation is not supported", "error");
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        
-        try {
-          const res = await fetch("/api/users/driver/location", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ lat: latitude, lng: longitude }),
-          });
-
-          if (res.ok) {
-            setDriverLocation({ lat: latitude, lng: longitude });
-            showToast(`📍 Location saved: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`, "success");
-          } else {
-            const data = await res.json();
-            showToast(data.message || "Failed to save location", "error");
-          }
-        } catch (err) {
-          console.error("Error saving location:", err);
-          showToast("Failed to save location", "error");
-        }
-      },
-      (error) => {
-        console.error("Geolocation error:", error);
-        showToast("Failed to get your location. Please enable location services.", "error");
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
-  };
+  useEffect(() => {
+    return () => {
+      stopOnDutyTracking();
+      dutySessionActive.current = false;
+    };
+  }, []);
 
   return (
     <div className="driver-dashboard">

@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Booking = require("../models/Booking");
 const { isAuthenticated, isDriver } = require("../middleware/authMiddleware");
+const { requireCompleteProfile } = require("../middleware/profileMiddleware");
 const {
   getBookingById,
   getPendingBookings,
@@ -13,7 +14,7 @@ const {
 // ---------------- User Routes ----------------
 
 // POST /api/bookings → create new booking
-router.post("/", isAuthenticated, async (req, res) => {
+router.post("/", isAuthenticated, requireCompleteProfile, async (req, res) => {
   try {
     const { pickup, destination, pickupLat, pickupLng, destLat, destLng } = req.body;
 

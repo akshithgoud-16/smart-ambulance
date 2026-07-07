@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { indiaCenter } from "../utils/mapUtils";
+import { authFetch } from "../utils/api";
 import "../styles/policeProfile.css";
 
 const placeholderAvatar = "https://via.placeholder.com/160x160.png?text=Police";
@@ -127,9 +128,7 @@ function PoliceProfile({ showToast }) {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("http://localhost:5000/api/users/profile", {
-        credentials: "include",
-      });
+      const res = await authFetch("/users/profile");
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Unable to load profile");
 
@@ -183,10 +182,8 @@ function PoliceProfile({ showToast }) {
     };
 
     try {
-      const res = await fetch("http://localhost:5000/api/users/profile", {
+      const res = await authFetch("/users/profile", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify(payload),
       });
       const data = await res.json();

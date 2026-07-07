@@ -1,3 +1,99 @@
+.otp-inline-input {
+  flex: 1 1 0;
+  min-width: 0;
+  margin-bottom: 0 !important;
+}
+.small-otp-btn {
+  padding: 0.3rem 0.7rem !important;
+  font-size: 0.85rem !important;
+  height: 32px !important;
+  min-width: 0 !important;
+  margin-left: 6px !important;
+}
+.signup-otp-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin-bottom: 1.1rem;
+}
+.signup-otp-row input.signup-input {
+  flex: 2 1 0;
+  min-width: 0;
+  margin-bottom: 0 !important;
+}
+.signup-otp-row .otp-btn {
+  flex: 1 1 0;
+  max-width: 160px;
+  min-width: 90px;
+  height: 38px;
+  white-space: nowrap;
+  margin-top: 0;
+  margin-bottom: 0 !important;
+}
+.signup-form-custom .signup-input {
+  font-size: 0.98rem;
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.signup-form-custom .form-group {
+  margin-bottom: 1.1rem;
+}
+
+.signup-form-custom select.signup-input {
+  padding-right: 2rem;
+}
+
+.otp-inline-input {
+  background: #fefae0 !important;
+  color: #264653 !important;
+  border: none;
+  border-radius: 15px;
+  padding: 1rem 1.2rem;
+  font-size: 1rem;
+}
+
+.otp-inline-input::placeholder {
+  color: #264653 !important;
+}
+
+/* Focus state to match others */
+.otp-inline-input:focus {
+  outline: none;
+  background: #ffffff !important;
+  box-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+
+.signup-otp-row .otp-btn {
+  background: #aec3b0 !important;   /* same as primary button */
+  color: #fff !important;
+  border: none !important;
+  font-weight: 700;
+  height: 38px;                     /* align with input */
+  transition: all 0.3s ease;
+}
+
+/* Hover */
+.signup-otp-row .otp-btn:hover:not(:disabled) {
+  background: #9bb3a0 !important;
+  transform: scale(1.05);
+  box-shadow: 0 6px 15px rgba(255,255,255,0.35);
+}
+
+/* Disabled state */
+.signup-otp-row .otp-btn:disabled {
+  background: #9bb3a0 !important;
+  color: #ffffff !important;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 /* General background animation */
 .auth-page {
   min-height: 100vh;
@@ -14,25 +110,6 @@
   position: relative;
 }
 
-/* Animated gradient overlay - disabled for simplicity */
-/*
-.auth-container::before {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
-  animation: rotate 20s linear infinite;
-  z-index: 1;
-}
-
-@keyframes rotate {
-  0% { transform: rotate(0deg);}
-  100% { transform: rotate(360deg);}
-}
-*/
 
 /* Glassmorphism card */
 .auth-card-glass {
@@ -92,6 +169,11 @@
   transition: all 0.3s ease;
 }
 
+.toggle-btn.active {
+  background: #fff;
+  color: #415a77;
+}
+
 .toggle-btn:hover {
   background: rgba(255,255,255,0.5);
   transform: scale(1.05);
@@ -148,7 +230,7 @@
   left: 1.2rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #e0e0e0;
+  color: #111 !important;
   font-weight: 500;
   pointer-events: none;
   transition: all 0.3s ease;
@@ -159,7 +241,7 @@
   top: -10px;
   left: 1rem;
   font-size: 0.8rem;
-  color: #fff;
+  color: #fff !important;
 }
 
 /* Select dropdown */
@@ -189,6 +271,73 @@ select.form-control {
 .btn-primary:hover {
   transform: scale(1.05);
   box-shadow: 0 10px 20px rgba(255,255,255,0.4);
+}
+
+.btn-secondary {
+  width: 100%;
+  padding: 0.8rem 0;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.35);
+}
+
+.auth-switches {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+.stepper {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  color: #fff;
+  flex-wrap: wrap;
+}
+
+.step {
+  padding: 0.35rem 0.75rem;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.15);
+  font-weight: 600;
+}
+
+.step.active {
+  background: #aec3b0;
+  color: #1b263b;
+}
+
+.hint {
+  color: #e8f0ff;
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+}
+
+.action-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.text-success {
+  color: #a6f4c5;
+  font-weight: 600;
+}
+
+.text-danger {
+  color: #ffd6d6;
+  font-weight: 600;
 }
 
 /* Responsive */

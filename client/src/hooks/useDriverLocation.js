@@ -5,6 +5,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { getSocket } from "../utils/socket";
+import { authFetch } from "../utils/api";
 
 export const useDriverLocation = (driverId, showToast) => {
   const [isTracking, setIsTracking] = useState(false);
@@ -29,16 +30,14 @@ export const useDriverLocation = (driverId, showToast) => {
 
         // Update location on server
         try {
-          await fetch("/api/users/driver/location", {
+          await authFetch("/users/driver/location", {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ lat: latitude, lng: longitude }),
-            credentials: "include",
           });
 
           // Emit to socket for real-time updates
           const socket = getSocket();
-          socket.emit("driver:location:update", {
+          socket.emit("driver:locationUpdate", {
             driverId,
             lat: latitude,
             lng: longitude,
@@ -74,11 +73,9 @@ export const useDriverLocation = (driverId, showToast) => {
   // Update driver's on-duty status
   const updateOnDutyStatus = async (onDuty) => {
     try {
-      await fetch("/api/users/driver/on-duty", {
+      await authFetch("/users/duty", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ onDuty }),
-        credentials: "include",
       });
     } catch (error) {
       console.error("Failed to update on-duty status:", error);

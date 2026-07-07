@@ -2,7 +2,7 @@ import { Navigate } from "react-router-dom";
 import UserHome from "./UserHome";
 
 function HomeRouter({ showToast }) {
-  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+  const isLoggedIn = !!localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
   if (isLoggedIn) {

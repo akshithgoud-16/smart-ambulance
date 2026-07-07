@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { authFetch } from "../utils/api";
 import "../styles/DriverHistory.css";
 
 const DriverHistory = ({ showToast }) => {
@@ -7,14 +8,13 @@ const DriverHistory = ({ showToast }) => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [addresses, setAddresses] = useState({});
+  const [loadingError, setLoadingError] = useState(false);
 
   // Fetch driver's booking history
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const res = await fetch("/api/bookings/driver", {
-          credentials: "include",
-        });
+        const res = await authFetch("/bookings/driver");
         if (res.ok) {
           const data = await res.json();
           setBookings(data);
@@ -95,6 +95,18 @@ const DriverHistory = ({ showToast }) => {
     }
   };
 
+  // Loading timeout fallback
+  useEffect(() => {
+    if (!loading) return;
+    const timeout = setTimeout(() => {
+      if (loading) {
+        setLoading(false);
+        setLoadingError(true);
+      }
+    }, 10000); // 10 seconds
+    return () => clearTimeout(timeout);
+  }, [loading]);
+
   return (
     <div className="driver-history-page">
       <div className="driver-history-header">
@@ -105,6 +117,11 @@ const DriverHistory = ({ showToast }) => {
         <div className="loading-state">
           <div className="loading-spinner"></div>
           <p>Loading your bookings...</p>
+          {loadingError && (
+            <div style={{color: 'red', marginTop: 16}}>
+              Failed to load bookings. Please check your connection or try again later.
+            </div>
+          )}
         </div>
       ) : bookings.length === 0 ? (
         <div className="no-history">

@@ -1,9 +1,7 @@
+process.env.NODE_OPTIONS = "--dns-result-order=ipv4first";
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const session = require("express-session");
-const MongoStore = require("connect-mongo");
-const passport = require("passport");
 const path = require("path");
 require("dotenv").config({ path: path.join(__dirname, ".env") });
 
@@ -13,16 +11,38 @@ const bookingRoutes = require("./routes/bookingRoutes");
 const policeRoutes = require("./routes/policeRoutes");
 const userRoutes = require("./routes/userRoutes");
 const bloodRoutes = require("./routes/bloodRoutes");
+const aiRoutes = require("./routes/aiRoutes");
 const { errorHandler, notFound } = require("./middleware/errorMiddleware");
 
 const app = express();
 const http = require("http");
 const server = http.createServer(app);
 const { Server } = require("socket.io");
+
+// Get allowed origins from environment or use defaults
+const getAllowedOrigins = () => {
+  const origins = ["http://localhost:3000"];
+  if (process.env.FRONTEND_URL) {
+    origins.push(process.env.FRONTEND_URL);
+  }
+  if (process.env.VERCEL_FRONTEND_URL) {
+    origins.push(process.env.VERCEL_FRONTEND_URL);
+  }
+  // Keep hardcoded production domain as fallback
+  origins.push("https://smart-ambulance-dun.vercel.app");
+  // Remove duplicates
+  return [...new Set(origins)];
+};
+
+const allowedOrigins = getAllowedOrigins();
+console.log("Allowed CORS origins:", allowedOrigins);
+
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: allowedOrigins,
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   },
 });
 
@@ -34,53 +54,21 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: allowedOrigins,
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   })
 );
+// Health check route
+app.get("/", (req, res) => {
+  res.status(200).json({ status: "ok", message: "Smart Ambulance backend is running." });
+});
 
 // Connect to MongoDB Atlas
 connectDB();
-
-// Session setup
-const isProd = process.env.NODE_ENV === "production";
-const mongoUri = process.env.MONGODB_URI;
-
-if (!mongoUri) {
-  console.error("Missing MONGODB_URI. Check server/.env.");
-  process.exit(1);
-}
-
-app.set("trust proxy", 1);
-
-app.use(
-  session({
-    name: "sid",
-    secret: process.env.SESSION_SECRET || "secretKey",
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({
-      mongoUrl: mongoUri,
-      ttl: 60 * 60 * 24,
-      autoRemove: "native",
-    }),
-    cookie: {
-      httpOnly: true,
-      sameSite: isProd ? "none" : "lax",
-      secure: isProd,
-      maxAge: 24 * 60 * 60 * 1000,
-    },
-  })
-);
-
-// Passport setup
-const User = require("./models/User");
-app.use(passport.initialize());
-app.use(passport.session());
-
-passport.use(User.createStrategy());
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
 
 // Routes
 app.use("/api/auth", authRoutes);
@@ -88,15 +76,8 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/police", policeRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/blood", bloodRoutes);
+app.use("/api/ai", require("./routes/aiRoutes"));
 
-// Example protected route
-app.get("/api/profile", (req, res) => {
-  if (req.isAuthenticated()) {
-    res.json({ user: req.user });
-  } else {
-    res.status(401).json({ message: "Unauthorized" });
-  }
-});
 
 // Error handling middleware
 app.use(notFound);
@@ -161,6 +142,6 @@ io.on("connection", (socket) => {
 
 // Start server
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () =>
-  console.log(`🚀 Server running on http://localhost:${PORT}`)
-);
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

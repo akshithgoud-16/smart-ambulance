@@ -2,10 +2,16 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/UserHome.css";
 import { getSocket } from "../utils/socket";
+import { authFetch } from "../utils/api";
+import chatbotIcon from "../assets/gai.png";
 
 const Home = ({ showToast }) => {
   const navigate = useNavigate();
   const [bloodRequestAlert, setBloodRequestAlert] = useState(null);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatInput, setChatInput] = useState("");
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatLoading, setChatLoading] = useState(false);
 
   useEffect(() => {
     const socket = getSocket();
@@ -38,6 +44,70 @@ const Home = ({ showToast }) => {
     e.stopPropagation();
     setBloodRequestAlert(null);
   };
+
+  const handleChatSubmit = async (e) => {
+    e.preventDefault();
+    const trimmed = chatInput.trim();
+    if (!trimmed || chatLoading) return;
+
+    setChatInput("");
+    setChatLoading(true);
+    setChatMessages((prev) => [...prev, { role: "user", text: trimmed }]);
+
+    try {
+      const role = localStorage.getItem("role") || undefined;
+      const res = await authFetch("/ai/chat", {
+        method: "POST",
+        body: JSON.stringify({ message: trimmed, role, page: "home" }),
+      });
+      const data = await res.json();
+      const reply = data && data.reply ? data.reply : "Sorry, I am unable to respond right now.";
+      setChatMessages((prev) => [...prev, { role: "assistant", text: reply }]);
+    } catch (error) {
+      setChatMessages((prev) => [
+        ...prev,
+        { role: "assistant", text: "Sorry, I am unable to respond right now." },
+      ]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
+  // Donor notification on home page
+  useEffect(() => {
+    async function notifyDonorIfNeeded() {
+      const role = localStorage.getItem("role");
+      if (role !== "donor") return;
+      // Try to get bloodGroup from profile API
+      let bloodGroup = null;
+      try {
+        const res = await authFetch("/users/profile");
+        const data = await res.json();
+        if (res.ok && data.bloodGroup) bloodGroup = data.bloodGroup;
+      } catch {}
+      if (!bloodGroup) return;
+      // Fetch pending requests
+      let pending = [];
+      try {
+        const res = await authFetch("/blood/pending");
+        const data = await res.json();
+        if (res.ok && Array.isArray(data)) pending = data;
+      } catch {}
+      // Check for matching pending requests
+      if (pending.some(r => r.bloodGroup === bloodGroup)) {
+        if (showToast) {
+          showToast(
+            <span style={{cursor:'pointer',textDecoration:'underline'}} onClick={() => navigate("/bloodhub", { state: { scrollTo: "donations" } })}>
+              You have new blood requests matching your group! Click here to view
+            </span>,
+            "info"
+          );
+        }
+      }
+    }
+    notifyDonorIfNeeded();
+    // eslint-disable-next-line
+  }, []);
 
   return (
     <div className="home-container">
@@ -80,8 +150,59 @@ const Home = ({ showToast }) => {
           <div className="pulse-ring"></div>
           {/* Font Awesome icon for the main visual */}
           <div className="ambulance-icon"><i className="fa-solid fa-truck-medical"></i></div>
+          <button
+            type="button"
+            className="chatbot-bubble"
+            aria-label="Open Pranapath AI Assistant"
+            onClick={() => setChatOpen(true)}
+          >
+            <img src={chatbotIcon} alt="" className="chatbot-bubble-image" />
+          </button>
         </div>
       </section>
+
+      {chatOpen && (
+        <div className="chat-panel" role="dialog" aria-label="Smart-Ambulance AI Assistant">
+          <div className="chat-panel-header">
+            <span>Smart-Ambulance AI Assistant</span>
+            <button
+              type="button"
+              className="chat-panel-close"
+              onClick={() => setChatOpen(false)}
+              aria-label="Close chat"
+            >
+              ×
+            </button>
+          </div>
+          <div className="chat-panel-body">
+            {chatMessages.length === 0 ? (
+              <div className="chat-empty">Ask about Pranapath features or how to use the app.</div>
+            ) : (
+              chatMessages.map((msg, idx) => (
+                <div
+                  key={`${msg.role}-${idx}`}
+                  className={`chat-message ${msg.role}`}
+                >
+                  {msg.text}
+                </div>
+              ))
+            )}
+            {chatLoading && <div className="chat-message assistant">Typing...</div>}
+          </div>
+          <form className="chat-panel-input" onSubmit={handleChatSubmit}>
+            <input
+              type="text"
+              placeholder="Type your question..."
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              disabled={chatLoading}
+            />
+            <button type="submit" disabled={chatLoading || !chatInput.trim()}>
+              Send
+            </button>
+          </form>
+        </div>
+      )}
 
       {/* Features Section (Icons were updated previously) */}
       <section className="features">

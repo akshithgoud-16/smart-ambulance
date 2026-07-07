@@ -4,6 +4,8 @@
   padding: 30px 40px;
   min-height: calc(100vh - 80px);
   background: #fefae0;
+  isolation: isolate;
+  position: relative;
 }
 
 /* Header Section */
@@ -237,13 +239,15 @@
 }
 
 .loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid #e0e0e0;
-  border-top-color: #1e3a5f;
+  width: 48px;
+  height: 48px;
+  border: 5px solid #e0e0e0;
+  border-top: 5px solid #1e3a5f;
+  border-right: 5px solid #00b4d8;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: spin 0.8s linear infinite;
   margin: 0 auto 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 @keyframes spin {

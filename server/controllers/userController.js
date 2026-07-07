@@ -17,11 +17,16 @@ const setDriverDutyStatus = async (req, res) => {
       }
     }
 
+    const updates = { onDuty };
+    if (!onDuty) {
+      updates.currentLocation = null;
+    }
+
     const user = await User.findByIdAndUpdate(
       req.user._id,
-      { onDuty },
+      updates,
       { new: true, runValidators: true }
-    ).select("-hash -salt");
+    ).select("-password -resetPasswordToken -resetPasswordExpire");
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -38,7 +43,9 @@ const setDriverDutyStatus = async (req, res) => {
 // ✅ Get user profile
 const getUserProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select("-hash -salt");
+    const user = await User.findById(req.user._id).select(
+      "-password -resetPasswordToken -resetPasswordExpire"
+    );
     if (!user) return res.status(404).json({ message: "User not found" });
     res.json(user);
   } catch (err) {
@@ -68,8 +75,11 @@ const updateUserProfile = async (req, res) => {
       username,
       email,
       displayName,
+      name,
       mobile,
+      mobileNumber,
       dob,
+      dateOfBirth,
       bloodGroup,
       station,
       area,
@@ -89,9 +99,23 @@ const updateUserProfile = async (req, res) => {
     }
     if (typeof displayName === "string") {
       updates.displayName = displayName.trim();
+      // map to strict field
+      updates.name = displayName.trim();
+    }
+    if (typeof name === "string") {
+      updates.name = name.trim();
+      // keep displayName in sync
+      updates.displayName = name.trim();
     }
     if (typeof mobile === "string") {
       updates.mobile = mobile.trim();
+      // map to strict field
+      updates.mobileNumber = mobile.trim();
+    }
+    if (typeof mobileNumber === "string") {
+      updates.mobileNumber = mobileNumber.trim();
+      // keep legacy in sync
+      updates.mobile = mobileNumber.trim();
     }
     if (typeof bloodGroup === "string") {
       updates.bloodGroup = bloodGroup.trim();
@@ -112,12 +136,15 @@ const updateUserProfile = async (req, res) => {
       updates.profilePhoto = profilePhoto;
     }
 
-    if (dob) {
-      const parsedDob = new Date(dob);
+    const dobInput = dateOfBirth ?? dob;
+    if (dobInput) {
+      const parsedDob = new Date(dobInput);
       if (Number.isNaN(parsedDob.getTime())) {
         return res.status(400).json({ message: "Invalid date of birth" });
       }
+      // set both fields
       updates.dob = parsedDob;
+      updates.dateOfBirth = parsedDob;
     }
 
     if (currentLocation) {
@@ -135,7 +162,7 @@ const updateUserProfile = async (req, res) => {
     const user = await User.findByIdAndUpdate(req.user._id, updates, {
       new: true,
       runValidators: true,
-    }).select("-hash -salt");
+    }).select("-password -resetPasswordToken -resetPasswordExpire");
 
     if (!user) return res.status(404).json({ message: "User not found" });
 

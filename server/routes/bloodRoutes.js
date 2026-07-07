@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { isAuthenticated } = require("../middleware/authMiddleware");
+const { requireCompleteProfile } = require("../middleware/profileMiddleware");
 const {
   createBloodRequest,
   getMyRequests,
@@ -12,7 +13,7 @@ const {
 } = require("../controllers/bloodController");
 
 // POST /api/blood/request - Create a new blood request
-router.post("/request", isAuthenticated, createBloodRequest);
+router.post("/request", isAuthenticated, requireCompleteProfile, createBloodRequest);
 
 // GET /api/blood/my-requests - Get all requests made by user
 router.get("/my-requests", isAuthenticated, getMyRequests);

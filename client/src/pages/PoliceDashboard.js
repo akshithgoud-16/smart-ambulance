@@ -1,20 +1,20 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { getSocket } from "../utils/socket";
+import { authFetch } from "../utils/api";
 import "../styles/PoliceDashboard.css";
 
 const PoliceDashboard = ({ showToast }) => {
   const [bookings, setBookings] = useState([]);
   const [addresses, setAddresses] = useState({});
   const [loading, setLoading] = useState(true);
+  const [loadingError, setLoadingError] = useState(false);
   const navigate = useNavigate();
 
   // Fetch active bookings from backend
   const fetchBookings = useCallback(async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/police/bookings", {
-        credentials: "include",
-      });
+      const res = await authFetch("/police/bookings");
       if (!res.ok) throw new Error("Failed to fetch bookings");
       const data = await res.json();
       
@@ -89,12 +89,29 @@ const PoliceDashboard = ({ showToast }) => {
     navigate(`/police/booking/${bookingId}`);
   };
 
+  // Loading timeout fallback
+  useEffect(() => {
+    if (!loading) return;
+    const timeout = setTimeout(() => {
+      if (loading) {
+        setLoading(false);
+        setLoadingError(true);
+      }
+    }, 10000); // 10 seconds
+    return () => clearTimeout(timeout);
+  }, [loading]);
+
   if (loading) {
     return (
       <div className="police-dashboard">
         <div className="loading-state">
           <div className="loading-spinner"></div>
           <p>Loading active emergencies...</p>
+          {loadingError && (
+            <div style={{color: 'red', marginTop: 16}}>
+              Failed to load emergencies. Please check your connection or try again later.
+            </div>
+          )}
         </div>
       </div>
     );

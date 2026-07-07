@@ -24,7 +24,12 @@ const getBookingById = async (req, res) => {
 // Get all pending bookings (for drivers)
 const getPendingBookings = async (req, res) => {
   try {
-    const driver = await User.findById(req.user._id).select("currentLocation");
+    const driver = await User.findById(req.user._id).select("currentLocation onDuty");
+
+    if (!driver?.onDuty) {
+      console.warn(`Pending bookings fetch skipped — driver ${req.user._id} is off duty`);
+      return res.json([]);
+    }
 
     // Require a valid location to filter nearby requests
     const driverLat = driver?.currentLocation?.lat;

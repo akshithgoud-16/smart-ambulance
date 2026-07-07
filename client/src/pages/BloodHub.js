@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import "../styles/BloodHub.css";
 import { getSocket } from "../utils/socket";
+import { authFetch } from "../utils/api";
+import { useProfileCompletion } from "../hooks/useProfileCompletion";
 
 const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 const URGENCY_LEVELS = [
@@ -29,6 +31,9 @@ const BloodHub = ({ showToast }) => {
   const [activeTab, setActiveTab] = useState("request");
 
   // Scroll to section based on navigation state
+  // Profile completion status
+  const { isProfileComplete } = useProfileCompletion(!!localStorage.getItem("token"));
+
   useEffect(() => {
     if (location.state?.scrollTo === "donations" && myDonationsRef.current) {
       setTimeout(() => {
@@ -84,9 +89,7 @@ const BloodHub = ({ showToast }) => {
 
   const fetchMyRequests = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/blood/my-requests", {
-        credentials: "include",
-      });
+      const res = await authFetch("/blood/my-requests");
       const data = await res.json();
       if (res.ok) {
         setMyRequests(data);
@@ -98,9 +101,7 @@ const BloodHub = ({ showToast }) => {
 
   const fetchMyDonations = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/blood/my-donations", {
-        credentials: "include",
-      });
+      const res = await authFetch("/blood/my-donations");
       const data = await res.json();
       if (res.ok) {
         setMyDonations(data);
@@ -112,9 +113,7 @@ const BloodHub = ({ showToast }) => {
 
   const fetchPendingRequests = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/blood/pending", {
-        credentials: "include",
-      });
+      const res = await authFetch("/blood/pending");
       const data = await res.json();
       if (res.ok) {
         setPendingRequests(data);
@@ -139,11 +138,15 @@ const BloodHub = ({ showToast }) => {
 
     setSubmitting(true);
 
+    // Block if profile incomplete
+    if (!isProfileComplete) {
+      showToast("Complete your profile to continue", "error");
+      window.location.replace("/profile");
+      return;
+    }
     try {
-      const res = await fetch("http://localhost:5000/api/blood/request", {
+      const res = await authFetch("/blood/request", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify(formData),
       });
 
@@ -174,9 +177,8 @@ const BloodHub = ({ showToast }) => {
 
   const handleAcceptRequest = async (requestId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/blood/accept/${requestId}`, {
+      const res = await authFetch(`/blood/accept/${requestId}`, {
         method: "PUT",
-        credentials: "include",
       });
 
       const data = await res.json();
@@ -195,9 +197,8 @@ const BloodHub = ({ showToast }) => {
 
   const handleCompleteRequest = async (requestId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/blood/complete/${requestId}`, {
+      const res = await authFetch(`/blood/complete/${requestId}`, {
         method: "PUT",
-        credentials: "include",
       });
 
       const data = await res.json();
@@ -218,9 +219,8 @@ const BloodHub = ({ showToast }) => {
     if (!window.confirm("Are you sure you want to cancel this request?")) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/blood/cancel/${requestId}`, {
+      const res = await authFetch(`/blood/cancel/${requestId}`, {
         method: "PUT",
-        credentials: "include",
       });
 
       const data = await res.json();
@@ -267,6 +267,28 @@ const BloodHub = ({ showToast }) => {
 
   const currentDonation = myDonations.find((d) => d.status === "accepted");
   const donationHistory = myDonations.filter((d) => d.status === "completed" || d.status === "cancelled");
+
+  // Donor notification on login
+  useEffect(() => {
+    async function notifyDonorIfNeeded() {
+      const role = localStorage.getItem("role");
+      if (role !== "donor") return;
+      // Try to get bloodGroup from profile API
+      let bloodGroup = null;
+      try {
+        const res = await authFetch("/users/profile");
+        const data = await res.json();
+        if (res.ok && data.bloodGroup) bloodGroup = data.bloodGroup;
+      } catch {}
+      if (!bloodGroup) return;
+      // Check for matching pending requests
+      if (pendingRequests.some(r => r.bloodGroup === bloodGroup)) {
+        showToast("You have new blood requests matching your group!", "info");
+      }
+    }
+    if (pendingRequests.length > 0) notifyDonorIfNeeded();
+    // eslint-disable-next-line
+  }, [pendingRequests]);
 
   return (
     <div className="blood-hub-container">
